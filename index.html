@@ -8,12 +8,13 @@
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="theme-color" content="#0b1a2b" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#0a1628" />
     <meta
       name="description"
-      content="Spaced-repetition flash cards to learn the faces and names of Texas Legislature members."
+      content="Learn Texas legislators by face. Tap to flip. Swipe if you knew them."
     />
-    <title>Texas Legislature Flash Cards</title>
+    <title>Who's Who · Texas Legislature</title>
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%87%BA%F0%9F%87%B8%3C/text%3E%3C/svg%3E"
@@ -22,58 +23,39 @@
   </head>
   <body>
     <div class="app" id="app">
-      <header class="topbar">
-        <div class="brand">
-          <span class="brand-flag" aria-hidden="true">★</span>
-          <div class="brand-text">
-            <h1>TX Leg Flash Cards</h1>
-            <p class="tagline">SM-2 · swipe to grade</p>
-          </div>
+      <!-- Minimal chrome: one line of status, no clutter -->
+      <header class="top">
+        <div class="top-left">
+          <span class="logo" aria-hidden="true">★</span>
+          <span class="app-name">Who's Who</span>
         </div>
-        <div class="scoreboard" id="scoreboard" aria-live="polite">
-          <div class="stat">
-            <span class="stat-label">Due</span>
-            <span class="stat-value" id="stat-due">0</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Learn</span>
-            <span class="stat-value" id="stat-learning">0</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">New</span>
-            <span class="stat-value" id="stat-new">0</span>
-          </div>
-          <div class="stat">
-            <span class="stat-label">Mature</span>
-            <span class="stat-value" id="stat-mature">0</span>
-          </div>
+        <div class="top-right" aria-live="polite">
+          <span class="pill" id="stat-left" title="Cards left in this session">— left</span>
         </div>
       </header>
 
-      <section class="controls" aria-label="Study settings">
-        <div class="segmented" role="group" aria-label="Chamber filter">
-          <button type="button" class="seg active" data-chamber="all">All</button>
-          <button type="button" class="seg" data-chamber="House">House</button>
-          <button type="button" class="seg" data-chamber="Senate">Senate</button>
-        </div>
-        <button type="button" class="icon-btn" id="btn-reset" title="Reset SRS progress" aria-label="Reset SRS progress">
-          ↺
-        </button>
-      </section>
-
-      <!-- Card stage: never scrolls; card stays centered in remaining viewport -->
-      <main class="stage" id="stage">
-        <div class="loading" id="loading">Loading members…</div>
+      <!-- The only interactive surface: full remaining height, no scroll -->
+      <main class="stage" id="stage" aria-label="Flash card">
+        <div class="boot">Loading…</div>
       </main>
 
-      <footer class="footer" id="footer">
-        <p class="footer-hint" id="footer-hint">
-          Tap <strong>Flip</strong> · swipe ← missed · swipe → got it
-        </p>
-        <p class="footer-meta">
-          <span id="data-meta"></span>
-        </p>
-      </footer>
+      <!-- Always-visible thumb bar: no hunting for buttons -->
+      <nav class="dock" id="dock" aria-label="Grade card">
+        <button type="button" class="dock-btn dont" id="btn-dont" disabled>
+          <span class="dock-icon" aria-hidden="true">←</span>
+          <span class="dock-label">Don't know</span>
+        </button>
+        <button type="button" class="dock-btn flip" id="btn-flip" disabled>
+          <span class="dock-icon" aria-hidden="true">↻</span>
+          <span class="dock-label">Show name</span>
+        </button>
+        <button type="button" class="dock-btn know" id="btn-know" disabled>
+          <span class="dock-icon" aria-hidden="true">→</span>
+          <span class="dock-label">Know them</span>
+        </button>
+      </nav>
+
+      <p class="coach" id="coach">Tap the card · swipe right if you knew them · left if not</p>
     </div>
 
     <script type="module" src="src/main.js"></script>
