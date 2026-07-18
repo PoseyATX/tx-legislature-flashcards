@@ -420,7 +420,12 @@ export function renderLeaderboard(mount, game = loadGameState()) {
           })
           .join("")}
       </ol>
-      <p class="lb-foot">Beat the Governor's Chief of Staff. No pressure.</p>
+      <p class="lb-foot">
+        Beat the Governor's Chief of Staff. No pressure.
+        <a class="kofi-link kofi-inline" href="https://ko-fi.com/poseyatx" target="_blank" rel="noopener noreferrer"
+          >☕ Fuel the bot on Ko-fi</a
+        >
+      </p>
     </div>
   `;
 

@@ -51,9 +51,13 @@ python3 scripts/scrape_members.py
 | `main` | Full SRS UI (mastery inputs, filters, fine grades) |
 | `mobile-simple` | **This** — politician / staff friendly, flip + swipe only |
 
+## Support
+
+If this saves you a hallway panic before a committee hearing, [buy a coffee on Ko-fi](https://ko-fi.com/poseyatx) — keeps the lights on and the model fed.
+
 ## Credits
 
-Project: [PoseyATX](https://github.com/PoseyATX) · [Matthew C. Posey](https://www.linkedin.com/in/matthew-c-posey/)
+Project: [PoseyATX](https://github.com/PoseyATX) · [Matthew C. Posey](https://www.linkedin.com/in/matthew-c-posey/) · [Ko-fi](https://ko-fi.com/poseyatx)
 
 ## License
 

@@ -445,6 +445,14 @@ function renderDone() {
                  </button>`
               : ""
           }
+          <a
+            class="dock-btn kofi-btn empty-btn"
+            href="https://ko-fi.com/poseyatx"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="dock-label">☕ Ko-fi</span>
+          </a>
         </div>
       </div>
     </div>

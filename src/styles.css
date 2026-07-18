@@ -489,17 +489,64 @@ a {
   border-color: rgba(212, 175, 55, 0.45);
 }
 
-/* Coach line */
+/* Coach + Ko-fi footer */
+.footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  min-height: 0;
+  height: var(--coach-h);
+  padding: 0 0.1rem;
+}
+
 .coach {
   margin: 0;
-  text-align: center;
-  font-size: 0.72rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+  font-size: 0.68rem;
   color: var(--muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: var(--coach-h);
-  height: var(--coach-h);
+}
+
+.kofi-link {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 94, 120, 0.14);
+  border: 1px solid rgba(255, 94, 120, 0.4);
+  color: #ffb3c0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1.2;
+  touch-action: manipulation;
+}
+
+.kofi-link:active {
+  transform: scale(0.97);
+  background: rgba(255, 94, 120, 0.22);
+}
+
+.kofi-inline {
+  display: inline-flex;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+.kofi-btn {
+  background: linear-gradient(180deg, rgba(255, 94, 120, 0.35), rgba(191, 10, 48, 0.2)) !important;
+  border-color: rgba(255, 94, 120, 0.5) !important;
+  text-decoration: none;
+  color: #fff !important;
 }
 
 /* Short phones: shrink dock labels, keep photo king */
@@ -524,8 +571,13 @@ a {
     display: none;
   }
 
+  .footer-bar {
+    justify-content: flex-end;
+  }
+
+  /* Keep Ko-fi reachable even on short screens */
   .app {
-    grid-template-rows: var(--top-h) minmax(0, 1fr) var(--dock-h);
+    grid-template-rows: var(--top-h) minmax(0, 1fr) var(--dock-h) var(--coach-h);
   }
 }
 
@@ -1011,6 +1063,12 @@ a {
   text-align: center;
   font-size: 0.72rem;
   color: var(--muted);
+  line-height: 1.45;
+}
+
+.lb-foot .kofi-inline {
+  margin: 0.35rem auto 0;
+  display: inline-flex;
 }
 
 body.lb-open {
