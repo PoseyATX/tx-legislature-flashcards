@@ -2,23 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#0b1a2b" />
     <meta
       name="description"
       content="Spaced-repetition flash cards to learn the faces and names of Texas Legislature members."
     />
     <title>Texas Legislature Flash Cards</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%87%BA%F0%9F%87%B8%3C/text%3E%3C/svg%3E" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%87%BA%F0%9F%87%B8%3C/text%3E%3C/svg%3E"
+    />
     <link rel="stylesheet" href="src/styles.css" />
   </head>
   <body>
-    <div class="app">
+    <div class="app" id="app">
       <header class="topbar">
         <div class="brand">
           <span class="brand-flag" aria-hidden="true">★</span>
-          <div>
-            <h1>Texas Legislature Flash Cards</h1>
-            <p class="tagline">SM-2 spaced repetition · 89th Legislature</p>
+          <div class="brand-text">
+            <h1>TX Leg Flash Cards</h1>
+            <p class="tagline">SM-2 · swipe to grade</p>
           </div>
         </div>
         <div class="scoreboard" id="scoreboard" aria-live="polite">
@@ -27,7 +36,7 @@
             <span class="stat-value" id="stat-due">0</span>
           </div>
           <div class="stat">
-            <span class="stat-label">Learning</span>
+            <span class="stat-label">Learn</span>
             <span class="stat-value" id="stat-learning">0</span>
           </div>
           <div class="stat">
@@ -42,42 +51,27 @@
       </header>
 
       <section class="controls" aria-label="Study settings">
-        <div class="control-group">
-          <span class="control-label">Chamber</span>
-          <div class="segmented" role="group" aria-label="Chamber filter">
-            <button type="button" class="seg active" data-chamber="all">All</button>
-            <button type="button" class="seg" data-chamber="House">House</button>
-            <button type="button" class="seg" data-chamber="Senate">Senate</button>
-          </div>
+        <div class="segmented" role="group" aria-label="Chamber filter">
+          <button type="button" class="seg active" data-chamber="all">All</button>
+          <button type="button" class="seg" data-chamber="House">House</button>
+          <button type="button" class="seg" data-chamber="Senate">Senate</button>
         </div>
-        <div class="control-group control-note">
-          <span class="control-label">Input difficulty</span>
-          <p class="note-text">
-            Adapts per card from mastery: 2-choice → 4 → 6 → type last name → type full name.
-            Scheduling uses Anki-style SM-2 (Again / Hard / Good / Easy).
-          </p>
-        </div>
+        <button type="button" class="icon-btn" id="btn-reset" title="Reset SRS progress" aria-label="Reset SRS progress">
+          ↺
+        </button>
       </section>
 
+      <!-- Card stage: never scrolls; card stays centered in remaining viewport -->
       <main class="stage" id="stage">
         <div class="loading" id="loading">Loading members…</div>
       </main>
 
-      <footer class="footer">
-        <p>
-          Member photos and names from the official
-          <a href="https://house.texas.gov/members" target="_blank" rel="noopener">Texas House</a>
-          and
-          <a href="https://senate.texas.gov/members.php" target="_blank" rel="noopener">Texas Senate</a>
-          member directories. For educational use.
+      <footer class="footer" id="footer">
+        <p class="footer-hint" id="footer-hint">
+          Tap <strong>Flip</strong> · swipe ← missed · swipe → got it
         </p>
         <p class="footer-meta">
           <span id="data-meta"></span>
-          ·
-          <button type="button" class="linkish" id="btn-reset">Reset SRS progress</button>
-          ·
-          <kbd>1</kbd>–<kbd>4</kbd> grade · <kbd>Enter</kbd> accept suggested ·
-          <kbd>A</kbd>/<kbd>H</kbd>/<kbd>G</kbd>/<kbd>E</kbd> · <kbd>Space</kbd> reveal
         </p>
       </footer>
     </div>

@@ -49,7 +49,13 @@ Input difficulty tracks that card’s SRS maturity:
 | Strong    | Interval approaching mature  | Type **last name**            |
 | Mastered  | Interval ≥ 21 days           | Type **full name**            |
 
-Also: chamber filter (All / House / Senate), keyboard grading (`1`–`4` or `A`/`H`/`G`/`E`), `Space` to reveal.
+### Mobile app UX
+
+- **3D flip** — `Flip` rotates the card 180° (`transform: rotateY`) to the answer face
+- **Swipe grade** — swipe **right = Got it** (Good), swipe **left = Missed** (Again); card flies off and the next drops in
+- **Viewport-safe shell** — `100svh` / `100dvh` app grid, `overflow: hidden`, safe-area insets; no page scroll on iOS Safari / Android Chrome
+- Chamber filter, optional Anki strip (Again/Hard/Good/Easy) on the back face
+- Keys: `Space`/`F` flip · `←` missed · `→` got it · `1`–`4` fine grades when flipped
 
 ## Refresh member data
 
