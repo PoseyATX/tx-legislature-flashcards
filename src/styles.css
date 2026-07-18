@@ -724,17 +724,13 @@ a {
 }
 
 @media (max-height: 560px) {
-  .coach {
-    display: none;
-  }
-
-  .footer-bar {
-    justify-content: flex-end;
-  }
-
   /* Keep Ko-fi reachable even on short screens */
   .app {
     grid-template-rows: var(--top-h) minmax(0, 1fr) var(--dock-h) var(--coach-h);
+  }
+
+  .app-nodock {
+    grid-template-rows: var(--top-h) minmax(0, 1fr) var(--coach-h);
   }
 }
 

@@ -101,18 +101,6 @@ function updateChrome() {
         : "—";
   }
 
-  if (els.coach) {
-    if (state.answered) {
-      els.coach.textContent = state.lastCorrect
-        ? "Correct — next face…"
-        : "Wrong — they'll be back soon";
-    } else if (state.practice) {
-      els.coach.textContent = "Drill mode · 4 choices · keep going";
-    } else {
-      els.coach.textContent = "Pick the name that matches the face";
-    }
-  }
-
   paintHUD();
 }
 
@@ -462,7 +450,6 @@ function renderDone() {
     renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
   });
 
-  if (els.coach) els.coach.textContent = "Keep drilling — or come back later.";
   paintHUD();
 }
 
