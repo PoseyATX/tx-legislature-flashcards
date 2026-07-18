@@ -10,7 +10,6 @@ import {
   markIntroduced,
   MC_CHOICE_COUNT,
   memberOrder,
-  minSessionSpacing,
   normalizeCard,
   queueStats,
   saveStore,
@@ -96,12 +95,11 @@ function paintHUD() {
 }
 
 function updateChrome() {
-  const left = state.queue.length;
   if (els.left) {
+    const unlocked = state.counts?.unlocked ?? state.pool?.length ?? 0;
+    const total = state.members?.length ?? 0;
     els.left.textContent =
-      state.pool.length > 0
-        ? `L${state.studyLevel} · ${state.counts.unlocked}/${state.members.length}`
-        : "—";
+      total > 0 ? `L${state.studyLevel} · ${unlocked}/${total}` : "—";
   }
 
   paintHUD();
@@ -468,25 +466,34 @@ function wireChrome() {
 async function init() {
   ensureLeaderboardRoot();
   wireChrome();
-  paintHUD();
 
   try {
-    const res = await fetch("data/members.json", { cache: "no-cache" });
+    // Resolve relative to this module so Pages subpaths always work
+    const url = new URL("../data/members.json", import.meta.url);
+    const res = await fetch(url, { cache: "no-cache" });
     if (!res.ok) throw new Error(`Could not load members (${res.status})`);
     const data = await res.json();
-    state.members = (data.members || [])
-      .filter((m) => m?.name && m?.photo)
+    const raw = Array.isArray(data) ? data : data?.members;
+    if (!Array.isArray(raw)) throw new Error("members.json missing members array");
+
+    state.members = raw
+      .filter((m) => m && m.name && m.photo)
       .sort(memberOrder);
 
-    if (state.members.length < 4) throw new Error("Need at least 4 members");
+    if (state.members.length < 4) {
+      throw new Error(`Need at least 4 members (got ${state.members.length})`);
+    }
 
     ensureCards(state.store, state.members);
     persist();
     rebuildUnlockedPool();
+    paintHUD();
     nextCard();
   } catch (err) {
     console.error(err);
-    els.stage.innerHTML = `<div class="error">Could not load members.<br><small>${escapeHtml(err.message)}</small></div>`;
+    if (els.stage) {
+      els.stage.innerHTML = `<div class="error">Could not load members.<br><small>${escapeHtml(err.message || String(err))}</small></div>`;
+    }
   }
 }
 

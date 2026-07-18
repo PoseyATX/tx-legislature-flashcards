@@ -460,15 +460,20 @@ export function buildSessionPass(store, members, passIndex = 0, now = Date.now()
  * @returns {{ member: typeof members[0] | null, cursor: typeof cursor }}
  */
 export function takeNextFromPass(store, members, cursor, now = Date.now()) {
-  const byId = new Map(members.map((m) => [m.id, m]));
+  const list = Array.isArray(members) ? members : [];
+  const byId = new Map(list.map((m) => [m.id, m]));
 
-  let { pass, index, passNumber } = cursor;
-  if (!pass || index >= pass.length) {
-    pass = buildSessionPass(store, members, passNumber, now);
+  const safe = cursor && typeof cursor === "object" ? cursor : {};
+  let pass = Array.isArray(safe.pass) ? safe.pass : [];
+  let index = Number.isFinite(safe.index) ? safe.index : 0;
+  let passNumber = Number.isFinite(safe.passNumber) ? safe.passNumber : 0;
+
+  if (!pass.length || index >= pass.length) {
+    pass = buildSessionPass(store, list, passNumber, now);
     index = 0;
     // Avoid starting a new pass on the same id we just finished with
-    if (pass.length > 1 && cursor.pass?.length) {
-      const last = cursor.pass[cursor.pass.length - 1];
+    if (pass.length > 1 && Array.isArray(safe.pass) && safe.pass.length) {
+      const last = safe.pass[safe.pass.length - 1];
       if (pass[0] === last) {
         pass = pass.slice(1).concat(pass[0]);
       }
