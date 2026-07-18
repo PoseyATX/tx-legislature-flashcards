@@ -652,41 +652,27 @@ a {
   border-color: rgba(212, 175, 55, 0.45);
 }
 
-/* Coach + Ko-fi footer */
+/* Ko-fi footer — centered, no coach text */
 .footer-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.4rem;
+  justify-content: center;
   min-height: 0;
   height: var(--coach-h);
   padding: 0 0.1rem;
 }
 
-.coach {
-  margin: 0;
-  flex: 1 1 auto;
-  min-width: 0;
-  text-align: left;
-  font-size: 0.68rem;
-  color: var(--muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: var(--coach-h);
-}
-
 .kofi-link {
-  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 0.15rem;
-  padding: 0.2rem 0.5rem;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.28rem 0.75rem;
   border-radius: 999px;
   background: rgba(255, 94, 120, 0.14);
   border: 1px solid rgba(255, 94, 120, 0.4);
   color: #ffb3c0;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 800;
   text-decoration: none;
   white-space: nowrap;

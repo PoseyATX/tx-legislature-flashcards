@@ -69,7 +69,6 @@ const $ = (id) => document.getElementById(id);
 const els = {
   stage: $("stage"),
   left: $("stat-left"),
-  coach: $("coach"),
   hudXp: $("hud-xp"),
   hudStreak: $("hud-streak"),
   hudCombo: $("hud-combo"),
