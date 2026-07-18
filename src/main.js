@@ -544,8 +544,10 @@ async function init() {
     }
 
     ensureCards(state.store, state.members);
+    if (!Array.isArray(state.store.knownIds)) state.store.knownIds = [];
+    if (!state.store.rosterFloor) state.store.rosterFloor = 30;
     persist();
-    rebuildUnlockedPool();
+    learningPool();
     paintHUD();
     nextCard();
   } catch (err) {
