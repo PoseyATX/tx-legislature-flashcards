@@ -358,19 +358,6 @@ function renderCard(dropIn) {
   const srs = state.currentSrs;
   if (!m || !srs) return;
 
-  const mastery = masteryLabel(
-    // lightweight: reuse stored fields
-    srs.state === "new" || srs.state === "learning" || srs.state === "relearning"
-      ? 0
-      : srs.interval >= 21
-        ? 4
-        : srs.interval >= 7
-          ? 3
-          : srs.interval >= 3
-            ? 2
-            : 1
-  );
-
   els.stage.innerHTML = `
     <div class="stack${dropIn ? " drop-in" : ""}" id="stack">
       <article class="card card-quiz" id="card">
