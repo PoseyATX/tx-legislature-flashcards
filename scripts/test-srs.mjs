@@ -9,6 +9,10 @@ import {
   buildQueue,
   ensureCards,
   memberOrder,
+  MC_CHOICE_COUNT,
+  studyLevelFromXP,
+  unlockedRosterSize,
+  LEARNING_STEPS_MIN,
 } from "../src/srs.js";
 
 const now = Date.UTC(2026, 6, 18, 12, 0, 0);
@@ -21,9 +25,13 @@ function assert(cond, msg) {
   }
 }
 
+assert(MC_CHOICE_COUNT === 4, "MC is always 4");
+assert(LEARNING_STEPS_MIN.every((m) => m === 0), "learning steps are in-session (0m)");
+
 let c = createNewCard("H-1", now);
 c = applyGrade(c, 3, now);
-assert(c.state === "learning" && c.step === 1, "first Good advances learning step");
+assert(c.state === "learning", "first Good stays in learning");
+assert(c.due <= now, "first Good re-queues immediately");
 c = applyGrade(c, 3, c.due);
 assert(c.state === "review" && c.interval === 1, "second Good graduates at 1d");
 
@@ -32,25 +40,25 @@ assert(afterGood.interval >= 6, "review Good multiplies interval");
 
 const failedCard = applyGrade(afterGood, 1, afterGood.due);
 assert(failedCard.state === "relearning", "Again on review → relearning");
-assert(failedCard.ease < afterGood.ease, "Again lowers ease");
+assert(failedCard.due <= afterGood.due + 1000, "relearn due immediately");
 
-let easy = applyGrade(createNewCard("H-2", now), 4, now);
-assert(easy.state === "review" && easy.interval === 4, "Easy graduates at 4d");
-
-const ladder = [0, 1, 5, 10, 30].map((interval, i) => {
+// Always 4-choice MC config
+for (const interval of [0, 1, 5, 10, 30]) {
   const card = createNewCard("t", now);
-  if (i === 0) return inputConfigForCard(card);
-  card.state = "review";
-  card.reps = 3;
-  card.interval = interval;
-  return inputConfigForCard(card);
-});
-assert(ladder[0].choiceCount === 2, "learning: 2-choice");
-assert(ladder[1].choiceCount === 4, "young: 4-choice");
-assert(ladder[2].choiceCount === 6, "familiar: 6-choice");
-assert(ladder[3].type === "type-last", "strong: type last");
-assert(ladder[4].type === "type-full", "mastered: type full");
-assert(masteryLevel({ state: "review", reps: 5, interval: 30, ease: 2.5, id: "x", lapses: 0, due: 0, step: 0, last: 0, introducedAt: 0 }) === 4, "mature mastery");
+  if (interval > 0) {
+    card.state = "review";
+    card.reps = 3;
+    card.interval = interval;
+  }
+  const cfg = inputConfigForCard(card);
+  assert(cfg.type === "mc" && cfg.choiceCount === 4, `config always 4 MC @ ivl ${interval}`);
+}
+
+assert(studyLevelFromXP(0) === 1, "xp0 level1");
+assert(studyLevelFromXP(100) === 2, "xp100 level2");
+assert(unlockedRosterSize(1, 180) === 30, "L1 unlocks 30");
+assert(unlockedRosterSize(2, 180) === 50, "L2 unlocks 50");
+assert(unlockedRosterSize(20, 180) === 180, "high level caps at 180");
 
 const members = [
   { id: "S-2", chamber: "Senate", district: 2, name: "B" },
@@ -60,11 +68,23 @@ const members = [
 ];
 const store = { cards: {}, newDay: "", newIntroducedToday: 0 };
 ensureCards(store, members);
-store.cards["L-1"] = applyGrade(store.cards["L-1"], 3, now - 1000);
-store.cards["L-1"].due = now - 1000;
-const { queue } = buildQueue(store, members, now);
-assert(queue[0] === "L-1", "learning before new");
-assert(queue.slice(1).join() === "H-1,H-2,S-2", "new cards fixed order");
+// All new → queue has new cards
+const { queue: q1 } = buildQueue(store, members, now);
+assert(q1.length === 4, "all new cards available");
+
+// Graduate all → practice mode still fills queue
+for (const m of members) {
+  let card = store.cards[m.id];
+  card = applyGrade(card, 3, now);
+  card = applyGrade(card, 3, card.due);
+  // push far into future
+  card.due = now + 7 * 86400000;
+  store.cards[m.id] = card;
+}
+const built = buildQueue(store, members, now);
+assert(built.practice === true, "practice when nothing due");
+assert(built.queue.length === 4, "practice still has full roster");
+
 assert(
   [...members].sort(memberOrder).map((m) => m.id).join() === "H-1,H-2,L-1,S-2",
   "memberOrder house/district"

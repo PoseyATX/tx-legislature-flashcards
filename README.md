@@ -7,11 +7,11 @@ Built for people who need this on their phone between meetings—not for power u
 ## How to use (the whole app)
 
 1. **See a face** (official headshot, **5:7** frame — House standard 125×175)
-2. **Tap the correct name** from 2–4 multiple-choice options (harder as you improve)
-3. Right answer → XP + streak juice · wrong → card returns sooner (SM-2)
-4. **Don't know** skips and counts as a miss
+2. **Tap the correct name** from **4** multiple-choice options
+3. Right → XP · wrong → that face returns soon (SM-2)
+4. **Keep going** — drill mode never stops after a short stack; earn XP to **unlock more of the 180-member roster** (Level 1 starts at 30 faces, +20 per level)
 
-Under the hood, **SM-2 spaced repetition** and **Capitol ranks / XP** keep score honest.
+Under the hood: continuous flash-card loop + Capitol ranks / XP.
 
 ## Why this exists
 

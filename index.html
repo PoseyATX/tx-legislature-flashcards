@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#0a1628" />
     <meta
       name="description"
-      content="Learn Texas legislators by face — multiple choice, spaced repetition, Capitol ranks."
+      content="Learn Texas legislators by face — 4-choice flash cards, levels, spaced repetition."
     />
     <title>Who's Who · Texas Legislature</title>
     <link
@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="src/styles.css" />
   </head>
   <body>
-    <div class="app" id="app">
+    <div class="app app-nodock" id="app">
       <header class="top">
         <button type="button" class="top-left top-hit" id="btn-leaderboard" title="Capitol leaderboard" aria-label="Open leaderboard">
           <span class="logo" aria-hidden="true">★</span>
@@ -32,20 +32,13 @@
           <span class="pill pill-xp" id="hud-xp" title="Total XP">0 XP</span>
           <span class="pill pill-streak" id="hud-streak" title="Day streak">0🔥</span>
           <span class="pill pill-combo" id="hud-combo" title="Combo">—</span>
-          <span class="pill pill-left" id="stat-left" title="Cards left">— left</span>
+          <span class="pill pill-left" id="stat-left" title="Study level and unlocked faces">L1 · —</span>
         </div>
       </header>
 
       <main class="stage" id="stage" aria-label="Flash card quiz">
         <div class="boot">Loading…</div>
       </main>
-
-      <nav class="dock dock-one" id="dock" aria-label="Card actions">
-        <button type="button" class="dock-btn dont" id="btn-skip" disabled>
-          <span class="dock-icon" aria-hidden="true">?</span>
-          <span class="dock-label">Don't know / skip</span>
-        </button>
-      </nav>
 
       <div class="footer-bar">
         <p class="coach" id="coach">Pick the name that matches the face</p>

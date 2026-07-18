@@ -1,6 +1,6 @@
 /**
  * Who's Who — Texas Legislature
- * Photo (5:7 official headshot ratio) + multiple-choice scoring + SRS + XP.
+ * 4-way multiple-choice flash cards + roster unlock levels + continuous drill.
  */
 
 import {
@@ -8,13 +8,15 @@ import {
   buildQueue,
   ensureCards,
   formatInterval,
-  inputConfigForCard,
   loadStore,
   masteryLabel,
   markIntroduced,
+  MC_CHOICE_COUNT,
   memberOrder,
   normalizeCard,
   saveStore,
+  studyLevelFromXP,
+  unlockedRosterSize,
 } from "./srs.js";
 
 import {
@@ -29,26 +31,37 @@ import {
 
 /** @typedef {{ id: string, name: string, nameSort?: string, chamber: 'House'|'Senate', district: number, photo: string, url: string, party: string|null }} Member */
 
-/** Official House headshots are 125×175 → 5:7. Use that as the standard frame. */
+/** Official House headshots are 125×175 → 5:7. */
 const PHOTO_RATIO = "5 / 7";
 const FLY_MS = 280;
 const AFTER_ANSWER_MS = 720;
 
 const state = {
   members: /** @type {Member[]} */ ([]),
+  /** Unlocked subset for the current study level */
   pool: /** @type {Member[]} */ ([]),
   store: loadStore(),
   queue: /** @type {string[]} */ ([]),
-  counts: { learningDue: 0, reviewDue: 0, newAvailable: 0, newTotal: 0, mature: 0 },
+  practice: false,
+  counts: {
+    learningDue: 0,
+    reviewDue: 0,
+    newAvailable: 0,
+    newTotal: 0,
+    mature: 0,
+    unlocked: 0,
+  },
+  studyLevel: 1,
   current: /** @type {Member|null} */ (null),
   currentSrs: /** @type {import('./srs.js').SrsCard|null} */ (null),
-  /** Always multiple-choice for scoring (2–4 options by mastery). */
-  choiceCount: 4,
+  choiceCount: MC_CHOICE_COUNT,
   choices: /** @type {Member[]} */ ([]),
   answered: false,
   selectedId: /** @type {string|null} */ (null),
   lastCorrect: false,
+  lastId: /** @type {string|null} */ (null),
   animating: false,
+  sessionAnswered: 0,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -57,7 +70,6 @@ const els = {
   stage: $("stage"),
   left: $("stat-left"),
   coach: $("coach"),
-  skip: $("btn-skip"),
   hudXp: $("hud-xp"),
   hudStreak: $("hud-streak"),
   hudCombo: $("hud-combo"),
@@ -81,24 +93,27 @@ function paintHUD() {
   );
 }
 
-function setDockEnabled(on) {
-  if (els.skip) els.skip.disabled = !on || state.answered || state.animating;
-}
-
 function updateChrome() {
-  const due = state.counts.learningDue + state.counts.reviewDue;
-  const left = due + state.counts.newAvailable;
-  if (els.left) els.left.textContent = left > 0 ? `${left} left` : "Done";
-
-  if (els.coach) {
-    els.coach.textContent = state.answered
-      ? state.lastCorrect
-        ? "Nice — next card loading…"
-        : "Noted — you'll see them again soon"
-      : "Pick the name that matches the face";
+  const left = state.queue.length;
+  if (els.left) {
+    els.left.textContent =
+      state.pool.length > 0
+        ? `L${state.studyLevel} · ${state.counts.unlocked}/${state.members.length}`
+        : "—";
   }
 
-  setDockEnabled(Boolean(state.current) && !state.animating);
+  if (els.coach) {
+    if (state.answered) {
+      els.coach.textContent = state.lastCorrect
+        ? "Correct — next face…"
+        : "Wrong — they'll be back soon";
+    } else if (state.practice) {
+      els.coach.textContent = "Drill mode · 4 choices · keep going";
+    } else {
+      els.coach.textContent = "Pick the name that matches the face";
+    }
+  }
+
   paintHUD();
 }
 
@@ -128,34 +143,42 @@ function shuffle(arr) {
   return a;
 }
 
+/**
+ * Distractors from the full unlocked pool (or all members if pool tiny).
+ */
 function pickDistractors(n, excludeId) {
-  const filtered = state.pool.filter((m) => m.id !== excludeId);
+  const source =
+    state.pool.length >= n + 1
+      ? state.pool
+      : state.members;
+  const filtered = source.filter((m) => m.id !== excludeId);
   return shuffle(filtered).slice(0, n);
 }
 
-/**
- * MC only — cap at 4 for mobile. Mastery still scales difficulty.
- * @param {import('./srs.js').SrsCard} srs
- */
-function mcChoiceCount(srs) {
-  const cfg = inputConfigForCard(srs);
-  // Force multiple-choice path even if SRS config says type-in
-  if (cfg.level <= 0) return 2;
-  if (cfg.level === 1) return 3;
-  return 4;
+function rebuildUnlockedPool() {
+  const game = loadGameState();
+  state.studyLevel = studyLevelFromXP(game.xp);
+  const n = unlockedRosterSize(state.studyLevel, state.members.length);
+  // Fixed order unlock: House by district, then Senate
+  state.pool = state.members.slice(0, n);
+  state.counts.unlocked = n;
 }
 
 function refreshPoolAndQueue() {
-  state.pool = [...state.members].sort(memberOrder);
-  ensureCards(state.store, state.pool);
-  const built = buildQueue(state.store, state.pool, Date.now());
+  rebuildUnlockedPool();
+  ensureCards(state.store, state.members);
+  const built = buildQueue(state.store, state.pool, Date.now(), {
+    excludeId: state.lastId,
+  });
   state.queue = built.queue;
+  state.practice = Boolean(built.practice);
   state.counts = {
     learningDue: built.counts.learningDue,
     reviewDue: built.counts.reviewDue,
     newAvailable: built.counts.newAvailable,
     newTotal: built.counts.newTotal,
     mature: built.counts.mature,
+    unlocked: state.pool.length,
   };
   updateChrome();
 }
@@ -163,22 +186,23 @@ function refreshPoolAndQueue() {
 function nextCard() {
   refreshPoolAndQueue();
 
-  if (state.pool.length < 2) {
-    els.stage.innerHTML = `<div class="error">Need at least two members for multiple choice.</div>`;
-    setDockEnabled(false);
+  if (state.pool.length < 4) {
+    els.stage.innerHTML = `<div class="error">Need at least four members for 4-choice quiz.</div>`;
     return;
   }
 
+  // Queue should almost never be empty now (practice mode). Hard stop only if pool empty.
   if (state.queue.length === 0) {
     renderDone();
     return;
   }
 
   const id = state.queue[0];
-  const member = state.pool.find((m) => m.id === id);
+  const member = state.pool.find((m) => m.id === id) || state.members.find((m) => m.id === id);
   if (!member) {
     delete state.store.cards[id];
     persist();
+    state.lastId = null;
     nextCard();
     return;
   }
@@ -203,12 +227,14 @@ function showMember(member, dropIn) {
   state.lastCorrect = false;
   state.animating = false;
 
-  const n = Math.min(mcChoiceCount(srs), state.pool.length);
-  state.choiceCount = n;
-  const distractors = pickDistractors(n - 1, member.id);
+  state.choiceCount = MC_CHOICE_COUNT;
+  const distractors = pickDistractors(MC_CHOICE_COUNT - 1, member.id);
   state.choices = shuffle([member, ...distractors]);
 
   refreshPoolAndQueue();
+  // Keep current card as "current" even if refresh changed queue order
+  state.current = member;
+  state.currentSrs = srs;
   renderCard(dropIn);
   updateChrome();
 }
@@ -220,7 +246,6 @@ function showMember(member, dropIn) {
 async function advanceAfterGrade(quality, dir) {
   if (!state.current || !state.currentSrs) return;
   state.animating = true;
-  setDockEnabled(false);
 
   const stack = $("stack");
   if (stack) {
@@ -230,6 +255,8 @@ async function advanceAfterGrade(quality, dir) {
 
   const updated = applyGrade(state.currentSrs, quality, Date.now());
   state.store.cards[state.current.id] = updated;
+  state.lastId = state.current.id;
+  state.sessionAnswered += 1;
   persist();
 
   state.animating = false;
@@ -237,21 +264,21 @@ async function advanceAfterGrade(quality, dir) {
 }
 
 /**
- * Score a multiple-choice pick (or skip as wrong).
- * @param {string|null} memberId  null = skip / give up
+ * Score a multiple-choice pick (required — no skip).
+ * @param {string} memberId
  */
 async function onChoose(memberId) {
   if (state.answered || state.animating || !state.current || !state.currentSrs) return;
+  if (!memberId) return;
 
   state.answered = true;
   state.selectedId = memberId;
-  const correct = memberId != null && memberId === state.current.id;
+  const correct = memberId === state.current.id;
   state.lastCorrect = correct;
 
   const stack = $("stack");
   const card = $("card");
 
-  // Paint choice states
   document.querySelectorAll(".choice").forEach((btn) => {
     const id = btn.getAttribute("data-id");
     btn.setAttribute("disabled", "true");
@@ -267,7 +294,6 @@ async function onChoose(memberId) {
       : `✗ ${chamberLabel(state.current)} ${state.current.name}`;
   }
 
-  // Reveal name under photo without full-card flip
   const reveal = $("photo-reveal");
   if (reveal) {
     reveal.hidden = false;
@@ -277,11 +303,19 @@ async function onChoose(memberId) {
     `;
   }
 
+  const prevLevel = state.studyLevel;
   if (correct) {
     onCorrectAnswer({ host: stack, card: card || stack });
   } else {
-    onWrongAnswer({ card: card || stack, button: memberId ? null : els.skip });
+    onWrongAnswer({ card: card || stack });
   }
+
+  // Level-up toast if roster expanded
+  rebuildUnlockedPool();
+  if (state.studyLevel > prevLevel) {
+    showLevelUp(state.studyLevel, state.counts.unlocked);
+  }
+
   paintHUD();
   updateChrome();
 
@@ -290,8 +324,16 @@ async function onChoose(memberId) {
   await advanceAfterGrade(quality, correct ? "right" : "left");
 }
 
-function skipCard() {
-  onChoose(null);
+function showLevelUp(level, unlocked) {
+  const host = $("stack") || els.stage;
+  if (!host) return;
+  const el = document.createElement("div");
+  el.className = "level-toast";
+  el.textContent = `LEVEL ${level} · ${unlocked} faces unlocked`;
+  host.appendChild(el);
+  void el.offsetWidth;
+  el.classList.add("is-on");
+  setTimeout(() => el.remove(), 1400);
 }
 
 function sleep(ms) {
@@ -329,16 +371,25 @@ function renderCard(dropIn) {
   const srs = state.currentSrs;
   if (!m || !srs) return;
 
-  const level = masteryLabel(
-    inputConfigForCard(srs).level
+  const mastery = masteryLabel(
+    // lightweight: reuse stored fields
+    srs.state === "new" || srs.state === "learning" || srs.state === "relearning"
+      ? 0
+      : srs.interval >= 21
+        ? 4
+        : srs.interval >= 7
+          ? 3
+          : srs.interval >= 3
+            ? 2
+            : 1
   );
 
   els.stage.innerHTML = `
     <div class="stack${dropIn ? " drop-in" : ""}" id="stack">
       <article class="card card-quiz" id="card">
         <header class="card-head">
-          <span class="badge">${escapeHtml(level)} · ${state.choiceCount} choices</span>
-          <span class="badge badge-muted">Who is this?</span>
+          <span class="badge">Study L${state.studyLevel} · ${state.counts.unlocked} faces</span>
+          <span class="badge badge-muted">4 choices · ${escapeHtml(mastery)}</span>
         </header>
 
         <div class="portrait-block">
@@ -369,46 +420,28 @@ function renderCard(dropIn) {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-      onChoose(btn.getAttribute("data-id"));
+      onChoose(btn.getAttribute("data-id") || "");
     });
   });
 }
 
 function renderDone() {
-  if (els.skip) els.skip.disabled = true;
-
+  // Should rarely hit — practice mode keeps the queue full.
   const game = loadGameState();
-  const upcoming = state.pool
-    .map((m) => state.store.cards[m.id])
-    .filter((c) => c && c.state !== "new" && c.due > Date.now())
-    .sort((a, b) => a.due - b.due);
-  const nextIn = upcoming[0] ? formatInterval(upcoming[0].due - Date.now()) : null;
-  const nextNew = state.pool.find((m) => {
-    const c = state.store.cards[m.id];
-    return !c || c.state === "new";
-  });
-
   els.stage.innerHTML = `
     <div class="empty">
       <div>
-        <h2>You're caught up</h2>
+        <h2>Session pause</h2>
         <p class="empty-rank">${escapeHtml(game.rankTitle || "")} · ${game.xp.toLocaleString()} XP</p>
-        <p>${
-          nextIn
-            ? `Next review in about <strong>${escapeHtml(nextIn)}</strong>.`
-            : "No reviews waiting right now."
-        }</p>
+        <p>Study level <strong>${state.studyLevel}</strong> · <strong>${state.counts.unlocked}</strong> / ${state.members.length} faces unlocked.</p>
+        <p>Earn XP to unlock more of the Legislature. Keep drilling the faces you have.</p>
         <div class="empty-actions">
-          <button type="button" class="dock-btn know empty-btn" id="btn-lb-done">
+          <button type="button" class="dock-btn know empty-btn" id="btn-keep">
+            <span class="dock-label">Keep drilling</span>
+          </button>
+          <button type="button" class="dock-btn flip empty-btn" id="btn-lb-done">
             <span class="dock-label">Leaderboard</span>
           </button>
-          ${
-            nextNew
-              ? `<button type="button" class="dock-btn flip empty-btn" id="btn-more">
-                   <span class="dock-label">Study more</span>
-                 </button>`
-              : ""
-          }
           <a
             class="dock-btn kofi-btn empty-btn"
             href="https://ko-fi.com/poseyatx"
@@ -422,25 +455,19 @@ function renderDone() {
     </div>
   `;
 
-  $("btn-more")?.addEventListener("click", () => {
-    if (nextNew) showMember(nextNew, true);
+  $("btn-keep")?.addEventListener("click", () => {
+    state.lastId = null;
+    nextCard();
   });
   $("btn-lb-done")?.addEventListener("click", () => {
     renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
   });
 
-  if (els.coach) els.coach.textContent = "Come back later — missed faces return first.";
+  if (els.coach) els.coach.textContent = "Keep drilling — or come back later.";
   paintHUD();
 }
 
-/* ---------------- chrome ---------------- */
-
 function wireChrome() {
-  els.skip?.addEventListener("click", (e) => {
-    e.preventDefault();
-    skipCard();
-  });
-
   els.leaderboardBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
@@ -459,10 +486,7 @@ function wireChrome() {
       onChoose(state.choices[num - 1].id);
       return;
     }
-    if (e.key === "s" || e.key === "S") {
-      e.preventDefault();
-      skipCard();
-    } else if (e.key === "l" || e.key === "L") {
+    if (e.key === "l" || e.key === "L") {
       e.preventDefault();
       renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
     }
@@ -482,14 +506,14 @@ async function init() {
       .filter((m) => m?.name && m?.photo)
       .sort(memberOrder);
 
-    if (state.members.length < 2) throw new Error("Empty member list");
+    if (state.members.length < 4) throw new Error("Need at least 4 members");
 
     ensureCards(state.store, state.members);
     persist();
+    rebuildUnlockedPool();
     nextCard();
   } catch (err) {
     console.error(err);
-    setDockEnabled(false);
     els.stage.innerHTML = `<div class="error">Could not load members.<br><small>${escapeHtml(err.message)}</small></div>`;
   }
 }

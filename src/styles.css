@@ -79,6 +79,11 @@ a {
   overflow: hidden;
 }
 
+/* No bottom dock — MC is the only input */
+.app-nodock {
+  grid-template-rows: var(--top-h) minmax(0, 1fr) var(--coach-h);
+}
+
 /* ---- Top bar / HUD ---- */
 .top {
   display: flex;
@@ -547,6 +552,31 @@ a {
 .choice.wrong {
   border-color: rgba(212, 43, 62, 0.7);
   background: rgba(212, 43, 62, 0.16);
+}
+
+.level-toast {
+  position: absolute;
+  left: 50%;
+  top: 28%;
+  z-index: 14;
+  transform: translate(-50%, 0) scale(0.85);
+  opacity: 0;
+  padding: 0.55rem 0.9rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(191, 10, 48, 0.88));
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.2, 1.1, 0.3, 1);
+}
+
+.level-toast.is-on {
+  opacity: 1;
+  transform: translate(-50%, -8px) scale(1);
 }
 
 /* ---- Dock (thumb zone) ---- */

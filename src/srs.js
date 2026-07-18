@@ -16,18 +16,50 @@
 export const STORAGE_KEY = "tx-leg-flashcards-srs-v2";
 export const STATS_KEY = "tx-leg-flashcards-stats-v2";
 
-/** Learning steps in minutes (Anki-like: 1m, 10m). */
-export const LEARNING_STEPS_MIN = [1, 10];
-/** Relearning steps after a lapse. */
-export const RELEARNING_STEPS_MIN = [10];
+/**
+ * Learning steps in minutes. Zeros re-queue in the same session
+ * (flash-card loop, not Anki desktop wait times).
+ * Two Goods to graduate; Again resets to step 0 due now.
+ */
+export const LEARNING_STEPS_MIN = [0, 0];
+/** Relearning after a lapse — immediate re-queue in-session. */
+export const RELEARNING_STEPS_MIN = [0];
 export const GRADUATING_INTERVAL_DAYS = 1;
 export const EASY_INTERVAL_DAYS = 4;
 export const STARTING_EASE = 2.5;
 export const MIN_EASE = 1.3;
 export const EASY_BONUS = 1.3;
 export const HARD_INTERVAL_FACTOR = 1.2;
-/** Max brand-new cards introduced per calendar day (local). */
-export const NEW_CARDS_PER_DAY = 20;
+/** Full 89th Legislature is fair game in one day of study. */
+export const NEW_CARDS_PER_DAY = 180;
+
+/** Always 4-way multiple choice for scoring. */
+export const MC_CHOICE_COUNT = 4;
+
+/**
+ * Roster unlock by Capitol level (from XP).
+ * Level 1: 30 faces · each level +20 · cap 180.
+ */
+export const ROSTER_BASE = 30;
+export const ROSTER_PER_LEVEL = 20;
+
+/**
+ * @param {number} xp
+ * @returns {number} 1-based study level
+ */
+export function studyLevelFromXP(xp) {
+  return 1 + Math.floor(Math.max(0, Number(xp) || 0) / 100);
+}
+
+/**
+ * How many legislators are unlocked at this study level.
+ * @param {number} level
+ * @param {number} total
+ */
+export function unlockedRosterSize(level, total) {
+  const n = ROSTER_BASE + (Math.max(1, level) - 1) * ROSTER_PER_LEVEL;
+  return Math.min(total, Math.max(ROSTER_BASE, n));
+}
 
 /**
  * @typedef {'new'|'learning'|'review'|'relearning'} CardState
@@ -119,65 +151,20 @@ export function masteryLabel(level) {
 }
 
 /**
- * Input configuration for a card based on mastery.
- * Harder recall as the card matures.
+ * Input configuration — always 4-choice MC for honest scoring.
  * @param {SrsCard} card
  */
 export function inputConfigForCard(card) {
   const level = masteryLevel(card);
-  switch (level) {
-    case 0:
-      return {
-        level,
-        type: "mc",
-        choiceCount: 2,
-        prompt: "photo-to-name",
-        showDistrictHint: true,
-        gradeOnCorrect: 3,
-        gradeOnWrong: 1,
-      };
-    case 1:
-      return {
-        level,
-        type: "mc",
-        choiceCount: 4,
-        prompt: "photo-to-name",
-        showDistrictHint: false,
-        gradeOnCorrect: 3,
-        gradeOnWrong: 1,
-      };
-    case 2:
-      return {
-        level,
-        type: "mc",
-        choiceCount: 6,
-        prompt: "photo-to-name",
-        showDistrictHint: false,
-        gradeOnCorrect: 3,
-        gradeOnWrong: 1,
-      };
-    case 3:
-      return {
-        level,
-        type: "type-last",
-        choiceCount: 0,
-        prompt: "photo-to-name",
-        showDistrictHint: false,
-        gradeOnCorrect: 4,
-        gradeOnWrong: 1,
-      };
-    case 4:
-    default:
-      return {
-        level,
-        type: "type-full",
-        choiceCount: 0,
-        prompt: "photo-to-name",
-        showDistrictHint: false,
-        gradeOnCorrect: 4,
-        gradeOnWrong: 1,
-      };
-  }
+  return {
+    level,
+    type: "mc",
+    choiceCount: MC_CHOICE_COUNT,
+    prompt: "photo-to-name",
+    showDistrictHint: level === 0,
+    gradeOnCorrect: 3,
+    gradeOnWrong: 1,
+  };
 }
 
 function minutesToMs(m) {
@@ -421,12 +408,16 @@ export function ensureCards(store, members) {
  *   1. Due learning / relearning (earliest due first)
  *   2. Due review (most overdue first)
  *   3. New cards in fixed member order, limited by NEW_CARDS_PER_DAY
+ *   4. If still empty: practice / drill entire unlocked set (soonest due,
+ *      then least recently seen) so a session never dies after ~15 cards
  *
  * @param {SrsStore} store
  * @param {{ id: string, chamber: string, district: number, name: string }[]} members
  * @param {number} now
+ * @param {{ excludeId?: string|null }} [opts]
  */
-export function buildQueue(store, members, now = Date.now()) {
+export function buildQueue(store, members, now = Date.now(), opts = {}) {
+  const excludeId = opts.excludeId || null;
   const today = dayKey(now);
   if (store.newDay !== today) {
     store.newDay = today;
@@ -441,6 +432,7 @@ export function buildQueue(store, members, now = Date.now()) {
   const fresh = [];
 
   for (const m of members) {
+    if (m.id === excludeId) continue;
     const card = store.cards[m.id] || createNewCard(m.id, now);
     if (card.state === "new") {
       fresh.push(m);
@@ -465,8 +457,29 @@ export function buildQueue(store, members, now = Date.now()) {
     queue.push(m.id);
   }
 
+  let practice = false;
+  if (queue.length === 0 && members.length > 0) {
+    // Keep the flash-card loop alive: drill the unlocked roster.
+    practice = true;
+    const drill = members
+      .filter((m) => m.id !== excludeId)
+      .map((m) => {
+        const c = store.cards[m.id] || createNewCard(m.id, now);
+        return { m, c };
+      })
+      .sort((a, b) => {
+        // Prefer weakest / soonest due / least recently seen
+        if (a.c.due !== b.c.due) return a.c.due - b.c.due;
+        if (a.c.last !== b.c.last) return a.c.last - b.c.last;
+        if (a.c.lapses !== b.c.lapses) return b.c.lapses - a.c.lapses;
+        return a.m.id.localeCompare(b.m.id);
+      });
+    for (const { m } of drill) queue.push(m.id);
+  }
+
   return {
     queue,
+    practice,
     counts: {
       learningDue: learning.length,
       reviewDue: review.length,
@@ -478,6 +491,7 @@ export function buildQueue(store, members, now = Date.now()) {
         return c && c.state === "review" && c.interval >= 21;
       }).length,
       total: members.length,
+      unlocked: members.length,
     },
   };
 }
