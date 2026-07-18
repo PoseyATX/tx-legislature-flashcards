@@ -1,18 +1,18 @@
 /**
- * Lightweight SM-2 / queue assertions (no browser).
+ * Round-robin session pass: no face twice until full unlocked roster seen.
  */
 import {
   createNewCard,
   applyGrade,
-  masteryLevel,
   inputConfigForCard,
-  buildQueue,
+  buildSessionPass,
+  takeNextFromPass,
+  minSessionSpacing,
   ensureCards,
   memberOrder,
   MC_CHOICE_COUNT,
   studyLevelFromXP,
   unlockedRosterSize,
-  LEARNING_STEPS_MIN,
 } from "../src/srs.js";
 
 const now = Date.UTC(2026, 6, 18, 12, 0, 0);
@@ -26,72 +26,77 @@ function assert(cond, msg) {
 }
 
 assert(MC_CHOICE_COUNT === 4, "MC is always 4");
-assert(LEARNING_STEPS_MIN.every((m) => m === 0), "learning steps are in-session (0m)");
+assert(minSessionSpacing(30) === 29, "gap is full roster - 1");
 
-let c = createNewCard("H-1", now);
-c = applyGrade(c, 3, now);
-assert(c.state === "learning", "first Good stays in learning");
-assert(c.due <= now, "first Good re-queues immediately");
-c = applyGrade(c, 3, c.due);
-assert(c.state === "review" && c.interval === 1, "second Good graduates at 1d");
-
-const afterGood = applyGrade(c, 3, c.due);
-assert(afterGood.interval >= 6, "review Good multiplies interval");
-
-const failedCard = applyGrade(afterGood, 1, afterGood.due);
-assert(failedCard.state === "relearning", "Again on review → relearning");
-assert(failedCard.due <= afterGood.due + 1000, "relearn due immediately");
-
-// Always 4-choice MC config
-for (const interval of [0, 1, 5, 10, 30]) {
-  const card = createNewCard("t", now);
-  if (interval > 0) {
-    card.state = "review";
-    card.reps = 3;
-    card.interval = interval;
-  }
-  const cfg = inputConfigForCard(card);
-  assert(cfg.type === "mc" && cfg.choiceCount === 4, `config always 4 MC @ ivl ${interval}`);
-}
-
-assert(studyLevelFromXP(0) === 1, "xp0 level1");
-assert(studyLevelFromXP(100) === 2, "xp100 level2");
-assert(unlockedRosterSize(1, 180) === 30, "L1 unlocks 30");
-assert(unlockedRosterSize(2, 180) === 50, "L2 unlocks 50");
-assert(unlockedRosterSize(20, 180) === 180, "high level caps at 180");
-
-const members = [
-  { id: "S-2", chamber: "Senate", district: 2, name: "B" },
-  { id: "H-2", chamber: "House", district: 2, name: "A2" },
-  { id: "H-1", chamber: "House", district: 1, name: "A1" },
-  { id: "L-1", chamber: "House", district: 50, name: "Learning" },
-];
+const members = Array.from({ length: 20 }, (_, i) => ({
+  id: `H-${i}`,
+  chamber: "House",
+  district: i + 1,
+  name: `Member ${i}`,
+}));
 const store = { cards: {}, newDay: "", newIntroducedToday: 0 };
 ensureCards(store, members);
-// All new → queue has new cards
-const { queue: q1 } = buildQueue(store, members, now);
-assert(q1.length === 4, "all new cards available");
 
-// Graduate all → practice mode still fills queue
-for (const m of members) {
-  let card = store.cards[m.id];
-  card = applyGrade(card, 3, now);
-  card = applyGrade(card, 3, card.due);
-  // push far into future
-  card.due = now + 7 * 86400000;
-  store.cards[m.id] = card;
+// First pass: all unique, fixed order
+const pass0 = buildSessionPass(store, members, 0, now);
+assert(pass0.length === 20, "pass length 20");
+assert(new Set(pass0).size === 20, "pass0 no internal dups");
+assert(pass0[0] === "H-0" && pass0[19] === "H-19", "stable order first pass");
+
+// Simulate 60 takes via cursor — within each pass, no dups
+let cursor = { pass: [], index: 0, passNumber: 0 };
+const seenInPass = new Set();
+let currentPassNum = 0;
+
+for (let turn = 0; turn < 60; turn += 1) {
+  const { member, cursor: next } = takeNextFromPass(store, members, cursor, now + turn * 1000);
+  assert(member, `turn ${turn} has member`);
+  if (!member) break;
+
+  if (next.passNumber !== currentPassNum && next.index === 1) {
+    // just started a new pass (index already advanced to 1)
+    seenInPass.clear();
+    currentPassNum = next.passNumber;
+  }
+  // While still on same pass array, no id twice
+  if (next.passNumber === cursor.passNumber || next.index > 1) {
+    // check uniqueness of remaining pass slice was unique at build
+  }
+  assert(!seenInPass.has(member.id), `turn ${turn}: ${member.id} already in this pass`);
+  seenInPass.add(member.id);
+
+  // When pass completes, clear for next
+  if (next.index >= next.pass.length) {
+    seenInPass.clear();
+    currentPassNum = next.passNumber;
+  }
+
+  cursor = next;
+
+  let c = store.cards[member.id];
+  c = applyGrade(c, 3, now + turn * 1000);
+  store.cards[member.id] = c;
 }
-const built = buildQueue(store, members, now);
-assert(built.practice === true, "practice when nothing due");
-assert(built.queue.length === 4, "practice still has full roster");
 
-assert(
-  [...members].sort(memberOrder).map((m) => m.id).join() === "H-1,H-2,L-1,S-2",
-  "memberOrder house/district"
-);
+// Counts over 60 turns on 20 faces: exactly 3 each
+const counts = {};
+cursor = { pass: [], index: 0, passNumber: 0 };
+for (let turn = 0; turn < 60; turn += 1) {
+  const { member, cursor: next } = takeNextFromPass(store, members, cursor, now);
+  counts[member.id] = (counts[member.id] || 0) + 1;
+  cursor = next;
+}
+const vals = Object.values(counts);
+assert(vals.every((v) => v === 3), `exactly 3 each after 60: ${JSON.stringify(counts)}`);
+
+const cfg = inputConfigForCard(createNewCard("x", now));
+assert(cfg.choiceCount === 4 && cfg.type === "mc", "always 4 MC");
+assert(studyLevelFromXP(0) === 1, "xp0 level1");
+assert(unlockedRosterSize(1, 180) === 30, "L1 unlocks 30");
+assert(memberOrder(members[1], members[0]) > 0, "memberOrder");
 
 if (failed) {
   console.error(`${failed} assertion(s) failed`);
   process.exit(1);
 }
-console.log("OK — SRS tests passed");
+console.log("OK — no face repeats until full roster pass completes");

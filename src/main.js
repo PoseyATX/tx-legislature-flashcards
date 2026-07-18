@@ -5,17 +5,17 @@
 
 import {
   applyGrade,
-  buildQueue,
   ensureCards,
-  formatInterval,
   loadStore,
-  masteryLabel,
   markIntroduced,
   MC_CHOICE_COUNT,
   memberOrder,
+  minSessionSpacing,
   normalizeCard,
+  queueStats,
   saveStore,
   studyLevelFromXP,
+  takeNextFromPass,
   unlockedRosterSize,
 } from "./srs.js";
 
@@ -41,8 +41,12 @@ const state = {
   /** Unlocked subset for the current study level */
   pool: /** @type {Member[]} */ ([]),
   store: loadStore(),
-  queue: /** @type {string[]} */ ([]),
-  practice: false,
+  /** Round-robin cursor: one unique pass through the unlocked roster at a time. */
+  passCursor: {
+    pass: /** @type {string[]} */ ([]),
+    index: 0,
+    passNumber: 0,
+  },
   counts: {
     learningDue: 0,
     reviewDue: 0,
@@ -59,7 +63,6 @@ const state = {
   answered: false,
   selectedId: /** @type {string|null} */ (null),
   lastCorrect: false,
-  lastId: /** @type {string|null} */ (null),
   animating: false,
   sessionAnswered: 0,
 };
@@ -144,53 +147,52 @@ function pickDistractors(n, excludeId) {
 
 function rebuildUnlockedPool() {
   const game = loadGameState();
+  const prevLevel = state.studyLevel;
   state.studyLevel = studyLevelFromXP(game.xp);
   const n = unlockedRosterSize(state.studyLevel, state.members.length);
   // Fixed order unlock: House by district, then Senate
   state.pool = state.members.slice(0, n);
   state.counts.unlocked = n;
+  // New faces unlocked mid-session → rebuild the current pass so they appear
+  // before we start repeating anyone
+  if (state.studyLevel > prevLevel) {
+    state.passCursor = { pass: [], index: 0, passNumber: state.passCursor.passNumber };
+  }
 }
 
-function refreshPoolAndQueue() {
+function refreshStats() {
   rebuildUnlockedPool();
   ensureCards(state.store, state.members);
-  const built = buildQueue(state.store, state.pool, Date.now(), {
-    excludeId: state.lastId,
-  });
-  state.queue = built.queue;
-  state.practice = Boolean(built.practice);
+  const stats = queueStats(state.store, state.pool, Date.now());
   state.counts = {
-    learningDue: built.counts.learningDue,
-    reviewDue: built.counts.reviewDue,
-    newAvailable: built.counts.newAvailable,
-    newTotal: built.counts.newTotal,
-    mature: built.counts.mature,
+    learningDue: stats.learningDue,
+    reviewDue: stats.reviewDue,
+    newAvailable: stats.newAvailable,
+    newTotal: stats.newTotal,
+    mature: stats.mature,
     unlocked: state.pool.length,
   };
   updateChrome();
 }
 
 function nextCard() {
-  refreshPoolAndQueue();
+  refreshStats();
 
   if (state.pool.length < 4) {
     els.stage.innerHTML = `<div class="error">Need at least four members for 4-choice quiz.</div>`;
     return;
   }
 
-  // Queue should almost never be empty now (practice mode). Hard stop only if pool empty.
-  if (state.queue.length === 0) {
-    renderDone();
-    return;
-  }
+  const { member, cursor } = takeNextFromPass(
+    state.store,
+    state.pool,
+    state.passCursor,
+    Date.now()
+  );
+  state.passCursor = cursor;
 
-  const id = state.queue[0];
-  const member = state.pool.find((m) => m.id === id) || state.members.find((m) => m.id === id);
   if (!member) {
-    delete state.store.cards[id];
-    persist();
-    state.lastId = null;
-    nextCard();
+    renderDone();
     return;
   }
 
@@ -218,8 +220,7 @@ function showMember(member, dropIn) {
   const distractors = pickDistractors(MC_CHOICE_COUNT - 1, member.id);
   state.choices = shuffle([member, ...distractors]);
 
-  refreshPoolAndQueue();
-  // Keep current card as "current" even if refresh changed queue order
+  refreshStats();
   state.current = member;
   state.currentSrs = srs;
   renderCard(dropIn);
@@ -242,7 +243,6 @@ async function advanceAfterGrade(quality, dir) {
 
   const updated = applyGrade(state.currentSrs, quality, Date.now());
   state.store.cards[state.current.id] = updated;
-  state.lastId = state.current.id;
   state.sessionAnswered += 1;
   persist();
 
@@ -376,7 +376,7 @@ function renderCard(dropIn) {
       <article class="card card-quiz" id="card">
         <header class="card-head">
           <span class="badge">Study L${state.studyLevel} · ${state.counts.unlocked} faces</span>
-          <span class="badge badge-muted">4 choices · ${escapeHtml(mastery)}</span>
+          <span class="badge badge-muted">4 choices · no repeats till full pass</span>
         </header>
 
         <div class="portrait-block">
@@ -443,7 +443,6 @@ function renderDone() {
   `;
 
   $("btn-keep")?.addEventListener("click", () => {
-    state.lastId = null;
     nextCard();
   });
   $("btn-lb-done")?.addEventListener("click", () => {

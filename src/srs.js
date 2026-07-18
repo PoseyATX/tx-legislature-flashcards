@@ -17,13 +17,13 @@ export const STORAGE_KEY = "tx-leg-flashcards-srs-v2";
 export const STATS_KEY = "tx-leg-flashcards-stats-v2";
 
 /**
- * Learning steps in minutes. Zeros re-queue in the same session
- * (flash-card loop, not Anki desktop wait times).
- * Two Goods to graduate; Again resets to step 0 due now.
+ * Learning steps in minutes (long-term SRS only).
+ * In-session order is owned by the app (round-robin / min spacing),
+ * not by zero-minute steps — those caused the same face every few cards.
  */
-export const LEARNING_STEPS_MIN = [0, 0];
-/** Relearning after a lapse — immediate re-queue in-session. */
-export const RELEARNING_STEPS_MIN = [0];
+export const LEARNING_STEPS_MIN = [10, 60];
+/** Relearning after a lapse. */
+export const RELEARNING_STEPS_MIN = [10];
 export const GRADUATING_INTERVAL_DAYS = 1;
 export const EASY_INTERVAL_DAYS = 4;
 export const STARTING_EASE = 2.5;
@@ -403,96 +403,166 @@ export function ensureCards(store, members) {
 }
 
 /**
- * Study queue — deterministic, never random card selection.
- * Priority:
- *   1. Due learning / relearning (earliest due first)
- *   2. Due review (most overdue first)
- *   3. New cards in fixed member order, limited by NEW_CARDS_PER_DAY
- *   4. If still empty: practice / drill entire unlocked set (soonest due,
- *      then least recently seen) so a session never dies after ~15 cards
+ * Minimum gap between two shows of the same face = full unlocked roster
+ * minus one (true round-robin: see everyone once before any repeat).
+ * @param {number} poolSize
+ */
+export function minSessionSpacing(poolSize) {
+  if (poolSize <= 1) return 0;
+  return poolSize - 1;
+}
+
+/**
+ * Build one full pass of the unlocked roster with no internal duplicates.
+ * First pass: fixed House/Senate order (new faces in stable order).
+ * Later passes: least-recently-seen / most-lapsed first, still unique per pass.
  *
  * @param {SrsStore} store
  * @param {{ id: string, chamber: string, district: number, name: string }[]} members
- * @param {number} now
- * @param {{ excludeId?: string|null }} [opts]
+ * @param {number} passIndex  0 = first run through roster
+ * @param {number} [now]
+ * @returns {string[]} member ids, each at most once
  */
-export function buildQueue(store, members, now = Date.now(), opts = {}) {
-  const excludeId = opts.excludeId || null;
-  const today = dayKey(now);
-  if (store.newDay !== today) {
-    store.newDay = today;
-    store.newIntroducedToday = 0;
+export function buildSessionPass(store, members, passIndex = 0, now = Date.now()) {
+  if (!members.length) return [];
+
+  if (passIndex === 0) {
+    // Stable introduction order — no randomness, no duplicates
+    return [...members].sort(memberOrder).map((m) => m.id);
   }
 
-  /** @type {SrsCard[]} */
-  const learning = [];
-  /** @type {SrsCard[]} */
-  const review = [];
-  /** @type {typeof members} */
-  const fresh = [];
+  // Later passes: unique set ordered by need (weak / due / stale)
+  return [...members]
+    .map((m) => {
+      const c = store.cards[m.id] || createNewCard(m.id, now);
+      return { m, c };
+    })
+    .sort((a, b) => {
+      const aDue = a.c.due <= now ? 0 : 1;
+      const bDue = b.c.due <= now ? 0 : 1;
+      if (aDue !== bDue) return aDue - bDue;
+      if (a.c.lapses !== b.c.lapses) return b.c.lapses - a.c.lapses;
+      if (a.c.last !== b.c.last) return a.c.last - b.c.last;
+      if (a.c.ease !== b.c.ease) return a.c.ease - b.c.ease;
+      return memberOrder(a.m, b.m);
+    })
+    .map(({ m }) => m.id);
+}
+
+/**
+ * Pick next face from a session pass cursor.
+ * Refills a full unique pass when exhausted — never injects mid-pass duplicates.
+ *
+ * @param {SrsStore} store
+ * @param {{ id: string, chamber: string, district: number, name: string }[]} members
+ * @param {{ pass: string[], index: number, passNumber: number }} cursor
+ * @param {number} [now]
+ * @returns {{ member: typeof members[0] | null, cursor: typeof cursor }}
+ */
+export function takeNextFromPass(store, members, cursor, now = Date.now()) {
+  const byId = new Map(members.map((m) => [m.id, m]));
+
+  let { pass, index, passNumber } = cursor;
+  if (!pass || index >= pass.length) {
+    pass = buildSessionPass(store, members, passNumber, now);
+    index = 0;
+    // Avoid starting a new pass on the same id we just finished with
+    if (pass.length > 1 && cursor.pass?.length) {
+      const last = cursor.pass[cursor.pass.length - 1];
+      if (pass[0] === last) {
+        pass = pass.slice(1).concat(pass[0]);
+      }
+    }
+  }
+
+  if (!pass.length) {
+    return {
+      member: null,
+      cursor: { pass: [], index: 0, passNumber },
+    };
+  }
+
+  const id = pass[index];
+  index += 1;
+  const nextPassNumber = index >= pass.length ? passNumber + 1 : passNumber;
+
+  return {
+    member: byId.get(id) || null,
+    cursor: { pass, index, passNumber: nextPassNumber },
+  };
+}
+
+/**
+ * @deprecated Prefer takeNextFromPass. Thin wrapper for older callers.
+ * @param {SrsStore} store
+ * @param {{ id: string, chamber: string, district: number, name: string }[]} members
+ * @param {string[]} recentIds
+ * @param {number} [now]
+ */
+export function pickNextMember(store, members, recentIds = [], now = Date.now()) {
+  // Reconstruct a pass that excludes recentIds already shown this pass
+  const seen = new Set(recentIds);
+  const remaining = members.filter((m) => !seen.has(m.id));
+  if (remaining.length) {
+    const pass = buildSessionPass(store, remaining, recentIds.length === 0 ? 0 : 1, now);
+    const id = pass[0];
+    return members.find((m) => m.id === id) || remaining[0];
+  }
+  // Full cycle complete — start a fresh unique pass
+  const pass = buildSessionPass(store, members, 1, now);
+  const last = recentIds[recentIds.length - 1];
+  const ordered = pass[0] === last && pass.length > 1 ? pass.slice(1).concat(pass[0]) : pass;
+  return members.find((m) => m.id === ordered[0]) || members[0] || null;
+}
+
+/**
+ * Stats snapshot for HUD (not used for ordering).
+ * @param {SrsStore} store
+ * @param {{ id: string }[]} members
+ * @param {number} [now]
+ */
+export function queueStats(store, members, now = Date.now()) {
+  let learningDue = 0;
+  let reviewDue = 0;
+  let newTotal = 0;
+  let mature = 0;
 
   for (const m of members) {
-    if (m.id === excludeId) continue;
-    const card = store.cards[m.id] || createNewCard(m.id, now);
-    if (card.state === "new") {
-      fresh.push(m);
+    const c = store.cards[m.id];
+    if (!c || c.state === "new") {
+      newTotal += 1;
       continue;
     }
-    if (card.due > now) continue;
-    if (card.state === "learning" || card.state === "relearning") learning.push(card);
-    else review.push(card);
-  }
-
-  learning.sort((a, b) => a.due - b.due || a.id.localeCompare(b.id));
-  review.sort((a, b) => a.due - b.due || a.id.localeCompare(b.id));
-  fresh.sort(memberOrder);
-
-  /** @type {string[]} */
-  const queue = [];
-  for (const c of learning) queue.push(c.id);
-  for (const c of review) queue.push(c.id);
-
-  const newSlots = Math.max(0, NEW_CARDS_PER_DAY - store.newIntroducedToday);
-  for (const m of fresh.slice(0, newSlots)) {
-    queue.push(m.id);
-  }
-
-  let practice = false;
-  if (queue.length === 0 && members.length > 0) {
-    // Keep the flash-card loop alive: drill the unlocked roster.
-    practice = true;
-    const drill = members
-      .filter((m) => m.id !== excludeId)
-      .map((m) => {
-        const c = store.cards[m.id] || createNewCard(m.id, now);
-        return { m, c };
-      })
-      .sort((a, b) => {
-        // Prefer weakest / soonest due / least recently seen
-        if (a.c.due !== b.c.due) return a.c.due - b.c.due;
-        if (a.c.last !== b.c.last) return a.c.last - b.c.last;
-        if (a.c.lapses !== b.c.lapses) return b.c.lapses - a.c.lapses;
-        return a.m.id.localeCompare(b.m.id);
-      });
-    for (const { m } of drill) queue.push(m.id);
+    if (c.state === "review" && c.interval >= 21) mature += 1;
+    if (c.due > now) continue;
+    if (c.state === "learning" || c.state === "relearning") learningDue += 1;
+    else reviewDue += 1;
   }
 
   return {
-    queue,
-    practice,
-    counts: {
-      learningDue: learning.length,
-      reviewDue: review.length,
-      newAvailable: Math.min(fresh.length, newSlots),
-      newRemainingToday: newSlots,
-      newTotal: fresh.length,
-      mature: members.filter((m) => {
-        const c = store.cards[m.id];
-        return c && c.state === "review" && c.interval >= 21;
-      }).length,
-      total: members.length,
-      unlocked: members.length,
-    },
+    learningDue,
+    reviewDue,
+    newAvailable: newTotal,
+    newRemainingToday: Math.max(0, NEW_CARDS_PER_DAY - (store.newIntroducedToday || 0)),
+    newTotal,
+    mature,
+    total: members.length,
+    unlocked: members.length,
+  };
+}
+
+/**
+ * @deprecated Prefer pickNextMember for live play. Kept for harnesses.
+ */
+export function buildQueue(store, members, now = Date.now(), opts = {}) {
+  const excludeId = opts.excludeId || null;
+  const recent = excludeId ? [excludeId] : [];
+  const next = pickNextMember(store, members, recent, now);
+  const stats = queueStats(store, members, now);
+  return {
+    queue: next ? [next.id] : [],
+    practice: false,
+    counts: stats,
   };
 }
 
