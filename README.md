@@ -6,14 +6,12 @@ Built for people who need this on their phone between meetings—not for power u
 
 ## How to use (the whole app)
 
-1. **See a face**
-2. **Tap the card** (or **Show name**) to flip
-3. **Swipe right** or tap **Know them** if you had it
-4. **Swipe left** or tap **Don't know** if you didn't
+1. **See a face** (official headshot, **5:7** frame — House standard 125×175)
+2. **Tap the correct name** from 2–4 multiple-choice options (harder as you improve)
+3. Right answer → XP + streak juice · wrong → card returns sooner (SM-2)
+4. **Don't know** skips and counts as a miss
 
-That's it. No quizzes to type through. No scrolling. No chamber pickers.
-
-Under the hood, **SM-2 spaced repetition** (Anki-style) brings missed faces back soon and spaces out the ones you know.
+Under the hood, **SM-2 spaced repetition** and **Capitol ranks / XP** keep score honest.
 
 ## Why this exists
 

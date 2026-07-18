@@ -1,6 +1,6 @@
 /**
  * Who's Who — Texas Legislature
- * Flip + swipe deck + Capitol gamification (XP, streak, combo, leaderboard).
+ * Photo (5:7 official headshot ratio) + multiple-choice scoring + SRS + XP.
  */
 
 import {
@@ -8,7 +8,9 @@ import {
   buildQueue,
   ensureCards,
   formatInterval,
+  inputConfigForCard,
   loadStore,
+  masteryLabel,
   markIntroduced,
   memberOrder,
   normalizeCard,
@@ -25,10 +27,12 @@ import {
   renderLeaderboard,
 } from "./gamification.js";
 
-/** @typedef {{ id: string, name: string, chamber: 'House'|'Senate', district: number, photo: string, url: string, party: string|null }} Member */
+/** @typedef {{ id: string, name: string, nameSort?: string, chamber: 'House'|'Senate', district: number, photo: string, url: string, party: string|null }} Member */
 
-const SWIPE_PX = 64;
+/** Official House headshots are 125×175 → 5:7. Use that as the standard frame. */
+const PHOTO_RATIO = "5 / 7";
 const FLY_MS = 280;
+const AFTER_ANSWER_MS = 720;
 
 const state = {
   members: /** @type {Member[]} */ ([]),
@@ -38,18 +42,13 @@ const state = {
   counts: { learningDue: 0, reviewDue: 0, newAvailable: 0, newTotal: 0, mature: 0 },
   current: /** @type {Member|null} */ (null),
   currentSrs: /** @type {import('./srs.js').SrsCard|null} */ (null),
-  flipped: false,
+  /** Always multiple-choice for scoring (2–4 options by mastery). */
+  choiceCount: 4,
+  choices: /** @type {Member[]} */ ([]),
+  answered: false,
+  selectedId: /** @type {string|null} */ (null),
+  lastCorrect: false,
   animating: false,
-};
-
-const gesture = {
-  active: false,
-  startX: 0,
-  startY: 0,
-  dx: 0,
-  dy: 0,
-  pointerId: /** @type {number|null} */ (null),
-  moved: false,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -58,9 +57,7 @@ const els = {
   stage: $("stage"),
   left: $("stat-left"),
   coach: $("coach"),
-  dont: $("btn-dont"),
-  flip: $("btn-flip"),
-  know: $("btn-know"),
+  skip: $("btn-skip"),
   hudXp: $("hud-xp"),
   hudStreak: $("hud-streak"),
   hudCombo: $("hud-combo"),
@@ -85,9 +82,7 @@ function paintHUD() {
 }
 
 function setDockEnabled(on) {
-  els.dont.disabled = !on;
-  els.flip.disabled = !on;
-  els.know.disabled = !on;
+  if (els.skip) els.skip.disabled = !on || state.answered || state.animating;
 }
 
 function updateChrome() {
@@ -95,18 +90,15 @@ function updateChrome() {
   const left = due + state.counts.newAvailable;
   if (els.left) els.left.textContent = left > 0 ? `${left} left` : "Done";
 
-  if (els.flip) {
-    els.flip.classList.toggle("is-answer", state.flipped);
-    const label = els.flip.querySelector(".dock-label");
-    if (label) label.textContent = state.flipped ? "Hide name" : "Show name";
-  }
-
   if (els.coach) {
-    els.coach.textContent = state.flipped
-      ? "Swipe right if you knew them · left if you didn't"
-      : "Tap the card or Show name · then swipe";
+    els.coach.textContent = state.answered
+      ? state.lastCorrect
+        ? "Nice — next card loading…"
+        : "Noted — you'll see them again soon"
+      : "Pick the name that matches the face";
   }
 
+  setDockEnabled(Boolean(state.current) && !state.animating);
   paintHUD();
 }
 
@@ -127,6 +119,32 @@ function escapeHtml(s) {
     .replaceAll('"', "&quot;");
 }
 
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickDistractors(n, excludeId) {
+  const filtered = state.pool.filter((m) => m.id !== excludeId);
+  return shuffle(filtered).slice(0, n);
+}
+
+/**
+ * MC only — cap at 4 for mobile. Mastery still scales difficulty.
+ * @param {import('./srs.js').SrsCard} srs
+ */
+function mcChoiceCount(srs) {
+  const cfg = inputConfigForCard(srs);
+  // Force multiple-choice path even if SRS config says type-in
+  if (cfg.level <= 0) return 2;
+  if (cfg.level === 1) return 3;
+  return 4;
+}
+
 function refreshPoolAndQueue() {
   state.pool = [...state.members].sort(memberOrder);
   ensureCards(state.store, state.pool);
@@ -145,8 +163,8 @@ function refreshPoolAndQueue() {
 function nextCard() {
   refreshPoolAndQueue();
 
-  if (state.pool.length < 1) {
-    els.stage.innerHTML = `<div class="error">No member data loaded.</div>`;
+  if (state.pool.length < 2) {
+    els.stage.innerHTML = `<div class="error">Need at least two members for multiple choice.</div>`;
     setDockEnabled(false);
     return;
   }
@@ -180,42 +198,32 @@ function showMember(member, dropIn) {
 
   state.current = member;
   state.currentSrs = srs;
-  state.flipped = false;
+  state.answered = false;
+  state.selectedId = null;
+  state.lastCorrect = false;
   state.animating = false;
+
+  const n = Math.min(mcChoiceCount(srs), state.pool.length);
+  state.choiceCount = n;
+  const distractors = pickDistractors(n - 1, member.id);
+  state.choices = shuffle([member, ...distractors]);
 
   refreshPoolAndQueue();
   renderCard(dropIn);
-  setDockEnabled(true);
   updateChrome();
 }
 
 /**
  * @param {1|2|3|4} quality
  * @param {'left'|'right'} dir
- * @param {'correct'|'wrong'} juice
  */
-async function gradeAndAdvance(quality, dir, juice) {
-  if (!state.current || !state.currentSrs || state.animating) return;
+async function advanceAfterGrade(quality, dir) {
+  if (!state.current || !state.currentSrs) return;
   state.animating = true;
   setDockEnabled(false);
 
   const stack = $("stack");
-  const card = $("card");
-
-  // Visual dopamine BEFORE fly-away so the player feels it
-  if (juice === "correct") {
-    onCorrectAnswer({ host: stack, card: card || stack });
-  } else {
-    onWrongAnswer({ card: card || stack, button: els.dont });
-  }
-  paintHUD();
-
-  // Let glow/shake/combo land before the card leaves
-  await sleep(juice === "correct" ? 380 : 320);
-
   if (stack) {
-    stack.classList.remove("dragging", "show-know", "show-dont");
-    stack.style.transform = "";
     stack.classList.add(dir === "right" ? "fly-right" : "fly-left");
     await sleep(FLY_MS);
   }
@@ -228,191 +236,147 @@ async function gradeAndAdvance(quality, dir, juice) {
   nextCard();
 }
 
-function knowThem() {
-  gradeAndAdvance(3, "right", "correct");
-}
+/**
+ * Score a multiple-choice pick (or skip as wrong).
+ * @param {string|null} memberId  null = skip / give up
+ */
+async function onChoose(memberId) {
+  if (state.answered || state.animating || !state.current || !state.currentSrs) return;
 
-function dontKnow() {
-  gradeAndAdvance(1, "left", "wrong");
-}
+  state.answered = true;
+  state.selectedId = memberId;
+  const correct = memberId != null && memberId === state.current.id;
+  state.lastCorrect = correct;
 
-function flip() {
-  if (state.animating || !state.current) return;
-  state.flipped = !state.flipped;
-  $("card")?.classList.toggle("flipped", state.flipped);
+  const stack = $("stack");
+  const card = $("card");
+
+  // Paint choice states
+  document.querySelectorAll(".choice").forEach((btn) => {
+    const id = btn.getAttribute("data-id");
+    btn.setAttribute("disabled", "true");
+    if (id === state.current.id) btn.classList.add("correct");
+    else if (id === memberId && !correct) btn.classList.add("wrong");
+  });
+
+  const fb = $("answer-feedback");
+  if (fb) {
+    fb.className = `answer-feedback ${correct ? "ok" : "bad"}`;
+    fb.textContent = correct
+      ? `✓ ${chamberLabel(state.current)} ${state.current.name}`
+      : `✗ ${chamberLabel(state.current)} ${state.current.name}`;
+  }
+
+  // Reveal name under photo without full-card flip
+  const reveal = $("photo-reveal");
+  if (reveal) {
+    reveal.hidden = false;
+    reveal.innerHTML = `
+      <p class="reveal-name">${escapeHtml(chamberLabel(state.current))} ${escapeHtml(state.current.name)}</p>
+      <p class="reveal-meta">${escapeHtml(metaLine(state.current))}</p>
+    `;
+  }
+
+  if (correct) {
+    onCorrectAnswer({ host: stack, card: card || stack });
+  } else {
+    onWrongAnswer({ card: card || stack, button: memberId ? null : els.skip });
+  }
+  paintHUD();
   updateChrome();
+
+  await sleep(AFTER_ANSWER_MS);
+  const quality = /** @type {1|2|3|4} */ (correct ? 3 : 1);
+  await advanceAfterGrade(quality, correct ? "right" : "left");
+}
+
+function skipCard() {
+  onChoose(null);
 }
 
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/* ---------------- gestures ---------------- */
-
-function bindGestures(stack) {
-  if ("PointerEvent" in window) {
-    stack.addEventListener("pointerdown", onDown);
-    stack.addEventListener("pointermove", onMove);
-    stack.addEventListener("pointerup", onUp);
-    stack.addEventListener("pointercancel", onUp);
-  } else {
-    stack.addEventListener("touchstart", onTouchStart, { passive: true });
-    stack.addEventListener("touchmove", onTouchMove, { passive: false });
-    stack.addEventListener("touchend", onTouchEnd);
-    stack.addEventListener("touchcancel", onTouchEnd);
-  }
-}
-
-function onDown(e) {
-  if (state.animating || e.button === 2) return;
-  gesture.active = true;
-  gesture.moved = false;
-  gesture.pointerId = e.pointerId;
-  gesture.startX = e.clientX;
-  gesture.startY = e.clientY;
-  gesture.dx = 0;
-  gesture.dy = 0;
-  const stack = $("stack");
-  stack?.classList.add("dragging");
-  try {
-    stack?.setPointerCapture(e.pointerId);
-  } catch {
-    /* ignore */
-  }
-}
-
-function onMove(e) {
-  if (!gesture.active || e.pointerId !== gesture.pointerId) return;
-  gesture.dx = e.clientX - gesture.startX;
-  gesture.dy = e.clientY - gesture.startY;
-  if (Math.abs(gesture.dx) > 6 || Math.abs(gesture.dy) > 6) gesture.moved = true;
-  if (Math.abs(gesture.dy) > Math.abs(gesture.dx) * 1.5) return;
-  e.preventDefault();
-  paintDrag(gesture.dx);
-}
-
-function onUp(e) {
-  if (!gesture.active) return;
-  if (gesture.pointerId != null && e.pointerId !== gesture.pointerId) return;
-  endGesture();
-}
-
-function onTouchStart(e) {
-  if (state.animating || !e.changedTouches?.length) return;
-  const t = e.changedTouches[0];
-  gesture.active = true;
-  gesture.moved = false;
-  gesture.pointerId = null;
-  gesture.startX = t.clientX;
-  gesture.startY = t.clientY;
-  gesture.dx = 0;
-  gesture.dy = 0;
-  $("stack")?.classList.add("dragging");
-}
-
-function onTouchMove(e) {
-  if (!gesture.active || !e.touches?.length) return;
-  const t = e.touches[0];
-  gesture.dx = t.clientX - gesture.startX;
-  gesture.dy = t.clientY - gesture.startY;
-  if (Math.abs(gesture.dx) > 6 || Math.abs(gesture.dy) > 6) gesture.moved = true;
-  if (Math.abs(gesture.dy) > Math.abs(gesture.dx) * 1.5) return;
-  e.preventDefault();
-  paintDrag(gesture.dx);
-}
-
-function onTouchEnd() {
-  if (!gesture.active) return;
-  endGesture();
-}
-
-function paintDrag(dx) {
-  const stack = $("stack");
-  if (!stack) return;
-  const rot = Math.max(-14, Math.min(14, dx / 16));
-  stack.style.transform = `translateX(${dx}px) rotate(${rot}deg)`;
-  stack.classList.toggle("show-know", dx > SWIPE_PX * 0.5);
-  stack.classList.toggle("show-dont", dx < -SWIPE_PX * 0.5);
-}
-
-function endGesture() {
-  const dx = gesture.dx;
-  const wasTap = !gesture.moved && Math.abs(dx) < 12 && Math.abs(gesture.dy) < 12;
-  gesture.active = false;
-  gesture.pointerId = null;
-
-  const stack = $("stack");
-  if (!stack) return;
-
-  stack.classList.remove("dragging", "show-know", "show-dont");
-
-  if (dx >= SWIPE_PX) {
-    knowThem();
-    return;
-  }
-  if (dx <= -SWIPE_PX) {
-    dontKnow();
-    return;
-  }
-
-  if (wasTap) {
-    stack.style.transform = "";
-    flip();
-    return;
-  }
-
-  stack.style.transition = "transform 0.2s ease";
-  stack.style.transform = "";
-  setTimeout(() => {
-    if (stack) stack.style.transition = "";
-  }, 200);
-}
-
 /* ---------------- render ---------------- */
 
+function renderChoices() {
+  return state.choices
+    .map((m, i) => {
+      let cls = "choice";
+      if (state.answered) {
+        if (m.id === state.current.id) cls += " correct";
+        else if (m.id === state.selectedId) cls += " wrong";
+      }
+      return `
+        <button type="button" class="${cls}" data-id="${escapeHtml(m.id)}" ${state.answered ? "disabled" : ""}>
+          <span class="choice-key">${i + 1}</span>
+          <span class="choice-text">
+            <span class="choice-name">${escapeHtml(m.name)}</span>
+            <span class="choice-meta">${escapeHtml(metaLine(m))}</span>
+          </span>
+        </button>
+      `;
+    })
+    .join("");
+}
+
+/**
+ * @param {boolean} dropIn
+ */
 function renderCard(dropIn) {
   const m = state.current;
-  if (!m) return;
+  const srs = state.currentSrs;
+  if (!m || !srs) return;
+
+  const level = masteryLabel(
+    inputConfigForCard(srs).level
+  );
 
   els.stage.innerHTML = `
     <div class="stack${dropIn ? " drop-in" : ""}" id="stack">
-      <div class="stamp dont" aria-hidden="true">Don't know</div>
-      <div class="stamp know" aria-hidden="true">Know them</div>
-      <div class="juice-layer" id="juice-layer" aria-hidden="true"></div>
+      <article class="card card-quiz" id="card">
+        <header class="card-head">
+          <span class="badge">${escapeHtml(level)} · ${state.choiceCount} choices</span>
+          <span class="badge badge-muted">Who is this?</span>
+        </header>
 
-      <div class="scene">
-        <div class="card${state.flipped ? " flipped" : ""}" id="card">
-          <div class="face front">
-            <div class="photo-wrap">
-              <img src="${escapeHtml(m.photo)}" alt="Legislator" draggable="false" referrerpolicy="no-referrer" />
-              <div class="face-caption">
-                <p class="eyebrow">Texas Legislature</p>
-                <p class="prompt">Who is this?</p>
-                <p class="hint">Tap card to show name</p>
-              </div>
-            </div>
+        <div class="portrait-block">
+          <div class="portrait-frame" style="aspect-ratio: ${PHOTO_RATIO}">
+            <img
+              src="${escapeHtml(m.photo)}"
+              alt="Legislator portrait"
+              width="125"
+              height="175"
+              draggable="false"
+              referrerpolicy="no-referrer"
+              decoding="async"
+            />
           </div>
-          <div class="face back">
-            <div class="photo-wrap">
-              <img src="${escapeHtml(m.photo)}" alt="" draggable="false" referrerpolicy="no-referrer" />
-              <div class="face-caption">
-                <p class="eyebrow">${escapeHtml(m.chamber)}</p>
-                <p class="name">${escapeHtml(chamberLabel(m))} ${escapeHtml(m.name)}</p>
-                <p class="meta">${escapeHtml(metaLine(m))}</p>
-              </div>
-            </div>
-          </div>
+          <div class="photo-reveal" id="photo-reveal" hidden></div>
         </div>
-      </div>
+
+        <p class="answer-feedback" id="answer-feedback" aria-live="polite"></p>
+
+        <div class="choices" role="group" aria-label="Name choices">
+          ${renderChoices()}
+        </div>
+      </article>
     </div>
   `;
 
-  const stack = $("stack");
-  if (stack) bindGestures(stack);
+  els.stage.querySelectorAll(".choice").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onChoose(btn.getAttribute("data-id"));
+    });
+  });
 }
 
 function renderDone() {
-  setDockEnabled(false);
+  if (els.skip) els.skip.disabled = true;
+
   const game = loadGameState();
   const upcoming = state.pool
     .map((m) => state.store.cards[m.id])
@@ -465,24 +429,16 @@ function renderDone() {
     renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
   });
 
-  if (els.coach) els.coach.textContent = "Come back later — the hard ones return first.";
-  updateChrome();
+  if (els.coach) els.coach.textContent = "Come back later — missed faces return first.";
+  paintHUD();
 }
 
 /* ---------------- chrome ---------------- */
 
-function wireDock() {
-  els.dont.addEventListener("click", (e) => {
+function wireChrome() {
+  els.skip?.addEventListener("click", (e) => {
     e.preventDefault();
-    dontKnow();
-  });
-  els.know.addEventListener("click", (e) => {
-    e.preventDefault();
-    knowThem();
-  });
-  els.flip.addEventListener("click", (e) => {
-    e.preventDefault();
-    flip();
+    skipCard();
   });
 
   els.leaderboardBtn?.addEventListener("click", (e) => {
@@ -495,16 +451,17 @@ function wireDock() {
       closeLeaderboard();
       return;
     }
-    if (state.animating || !state.current) return;
-    if (e.key === " " || e.key === "Enter" || e.key === "f" || e.key === "F") {
+    if (state.animating || !state.current || state.answered) return;
+
+    const num = Number(e.key);
+    if (num >= 1 && num <= state.choices.length) {
       e.preventDefault();
-      flip();
-    } else if (e.key === "ArrowRight") {
+      onChoose(state.choices[num - 1].id);
+      return;
+    }
+    if (e.key === "s" || e.key === "S") {
       e.preventDefault();
-      knowThem();
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      dontKnow();
+      skipCard();
     } else if (e.key === "l" || e.key === "L") {
       e.preventDefault();
       renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
@@ -514,7 +471,7 @@ function wireDock() {
 
 async function init() {
   ensureLeaderboardRoot();
-  wireDock();
+  wireChrome();
   paintHUD();
 
   try {
@@ -525,7 +482,7 @@ async function init() {
       .filter((m) => m?.name && m?.photo)
       .sort(memberOrder);
 
-    if (state.members.length < 1) throw new Error("Empty member list");
+    if (state.members.length < 2) throw new Error("Empty member list");
 
     ensureCards(state.store, state.members);
     persist();

@@ -12,7 +12,7 @@
     <meta name="theme-color" content="#0a1628" />
     <meta
       name="description"
-      content="Learn Texas legislators by face. Tap to flip. Swipe if you knew them. Climb the Capitol ranks."
+      content="Learn Texas legislators by face — multiple choice, spaced repetition, Capitol ranks."
     />
     <title>Who's Who · Texas Legislature</title>
     <link
@@ -36,27 +36,19 @@
         </div>
       </header>
 
-      <main class="stage" id="stage" aria-label="Flash card">
+      <main class="stage" id="stage" aria-label="Flash card quiz">
         <div class="boot">Loading…</div>
       </main>
 
-      <nav class="dock" id="dock" aria-label="Grade card">
-        <button type="button" class="dock-btn dont" id="btn-dont" disabled>
-          <span class="dock-icon" aria-hidden="true">←</span>
-          <span class="dock-label">Don't know</span>
-        </button>
-        <button type="button" class="dock-btn flip" id="btn-flip" disabled>
-          <span class="dock-icon" aria-hidden="true">↻</span>
-          <span class="dock-label">Show name</span>
-        </button>
-        <button type="button" class="dock-btn know" id="btn-know" disabled>
-          <span class="dock-icon" aria-hidden="true">→</span>
-          <span class="dock-label">Know them</span>
+      <nav class="dock dock-one" id="dock" aria-label="Card actions">
+        <button type="button" class="dock-btn dont" id="btn-skip" disabled>
+          <span class="dock-icon" aria-hidden="true">?</span>
+          <span class="dock-label">Don't know / skip</span>
         </button>
       </nav>
 
       <div class="footer-bar">
-        <p class="coach" id="coach">Tap the card · swipe right if you knew them · left if not</p>
+        <p class="coach" id="coach">Pick the name that matches the face</p>
         <a
           class="kofi-link"
           href="https://ko-fi.com/poseyatx"
@@ -68,7 +60,6 @@
       </div>
     </div>
 
-    <!-- Phantom leaderboard overlay (filled by renderLeaderboard) -->
     <div id="leaderboard-root" class="leaderboard-root" hidden></div>
 
     <script type="module" src="src/main.js"></script>
