@@ -6,8 +6,11 @@
 import {
   applyGrade,
   ensureCards,
+  knownSet,
   loadStore,
   markIntroduced,
+  markKnown,
+  maybeExpandRoster,
   MC_CHOICE_COUNT,
   memberOrder,
   normalizeCard,
@@ -15,6 +18,7 @@ import {
   saveStore,
   studyLevelFromXP,
   takeNextFromPass,
+  unknownMembers,
   unlockedRosterSize,
 } from "./srs.js";
 
@@ -96,10 +100,12 @@ function paintHUD() {
 
 function updateChrome() {
   if (els.left) {
+    const known = knownSet(state.store).size;
     const unlocked = state.counts?.unlocked ?? state.pool?.length ?? 0;
-    const total = state.members?.length ?? 0;
+    const left = Math.max(0, unlocked - known);
+    // e.g. "12 left · 18 known"
     els.left.textContent =
-      total > 0 ? `L${state.studyLevel} · ${unlocked}/${total}` : "—";
+      state.members?.length > 0 ? `${left} left · ${known}✓` : "—";
   }
 
   paintHUD();
@@ -132,42 +138,48 @@ function shuffle(arr) {
 }
 
 /**
- * Distractors from the full unlocked pool (or all members if pool tiny).
+ * Distractors: any legislator name is fair game (including ones already known).
+ * Prompt faces never reuse known cards — only the name list may.
  */
 function pickDistractors(n, excludeId) {
   const source =
-    state.pool.length >= n + 1
-      ? state.pool
-      : state.members;
+    state.members.length >= n + 1 ? state.members : state.pool;
   const filtered = source.filter((m) => m.id !== excludeId);
   return shuffle(filtered).slice(0, n);
 }
 
-function rebuildUnlockedPool() {
+/**
+ * Unlocked roster size = max(XP level unlock, roster floor after clearing levels).
+ */
+function currentUnlockCount() {
   const game = loadGameState();
-  const prevLevel = state.studyLevel;
   state.studyLevel = studyLevelFromXP(game.xp);
-  const n = unlockedRosterSize(state.studyLevel, state.members.length);
-  // Fixed order unlock: House by district, then Senate
+  const fromXp = unlockedRosterSize(state.studyLevel, state.members.length);
+  const floor = Math.max(30, state.store.rosterFloor || 30);
+  return Math.min(state.members.length, Math.max(fromXp, floor));
+}
+
+/**
+ * @returns {Member[]} faces not yet answered correctly (still to learn)
+ */
+function learningPool() {
+  const n = currentUnlockCount();
   state.pool = state.members.slice(0, n);
   state.counts.unlocked = n;
-  // New faces unlocked mid-session → rebuild the current pass so they appear
-  // before we start repeating anyone
-  if (state.studyLevel > prevLevel) {
-    state.passCursor = { pass: [], index: 0, passNumber: state.passCursor.passNumber };
-  }
+  return unknownMembers(state.store, state.pool);
 }
 
 function refreshStats() {
-  rebuildUnlockedPool();
   ensureCards(state.store, state.members);
-  const stats = queueStats(state.store, state.pool, Date.now());
+  const learning = learningPool();
+  const stats = queueStats(state.store, learning, Date.now());
+  const known = knownSet(state.store).size;
   state.counts = {
     learningDue: stats.learningDue,
     reviewDue: stats.reviewDue,
-    newAvailable: stats.newAvailable,
-    newTotal: stats.newTotal,
-    mature: stats.mature,
+    newAvailable: learning.length,
+    newTotal: learning.length,
+    mature: known,
     unlocked: state.pool.length,
   };
   updateChrome();
@@ -176,21 +188,57 @@ function refreshStats() {
 function nextCard() {
   refreshStats();
 
-  if (state.pool.length < 4) {
+  if (state.members.length < 4) {
     els.stage.innerHTML = `<div class="error">Need at least four members for 4-choice quiz.</div>`;
     return;
   }
 
+  let learning = learningPool();
+
+  // Cleared this unlock band → open more faces (level progression)
+  let guard = 0;
+  while (learning.length === 0 && state.pool.length < state.members.length && guard < 12) {
+    guard += 1;
+    const { expanded, newFloor } = maybeExpandRoster(
+      state.store,
+      state.pool.length,
+      state.members.length
+    );
+    persist();
+    if (!expanded) break;
+    showLevelUp(
+      Math.max(1, Math.ceil((newFloor - 30) / 20) + 1),
+      newFloor
+    );
+    // Reset pass so new faces deal in order
+    state.passCursor = { pass: [], index: 0, passNumber: 0 };
+    learning = learningPool();
+  }
+
+  if (learning.length === 0) {
+    renderAllKnown();
+    return;
+  }
+
+  // Pass only over unlearned faces — never re-prompt a known face
   const { member, cursor } = takeNextFromPass(
     state.store,
-    state.pool,
+    learning,
     state.passCursor,
     Date.now()
   );
   state.passCursor = cursor;
 
   if (!member) {
-    renderDone();
+    // Pass exhausted of unknowns (shouldn't happen often) — rebuild
+    state.passCursor = { pass: [], index: 0, passNumber: 0 };
+    const retry = takeNextFromPass(state.store, learning, state.passCursor, Date.now());
+    state.passCursor = retry.cursor;
+    if (!retry.member) {
+      renderAllKnown();
+      return;
+    }
+    showMember(retry.member, true);
     return;
   }
 
@@ -288,17 +336,13 @@ async function onChoose(memberId) {
     `;
   }
 
-  const prevLevel = state.studyLevel;
   if (correct) {
+    // Retire this face as a prompt for the rest of progress (names still OK as foils)
+    markKnown(state.store, state.current.id);
+    persist();
     onCorrectAnswer({ host: stack, card: card || stack });
   } else {
     onWrongAnswer({ card: card || stack });
-  }
-
-  // Level-up toast if roster expanded
-  rebuildUnlockedPool();
-  if (state.studyLevel > prevLevel) {
-    showLevelUp(state.studyLevel, state.counts.unlocked);
   }
 
   paintHUD();
@@ -360,8 +404,8 @@ function renderCard(dropIn) {
     <div class="stack${dropIn ? " drop-in" : ""}" id="stack">
       <article class="card card-quiz" id="card">
         <header class="card-head">
-          <span class="badge">Study L${state.studyLevel} · ${state.counts.unlocked} faces</span>
-          <span class="badge badge-muted">4 choices · no repeats till full pass</span>
+          <span class="badge">${unknownMembers(state.store, state.pool).length} to learn · ${knownSet(state.store).size} known</span>
+          <span class="badge badge-muted">4 choices · correct = retired</span>
         </header>
 
         <div class="portrait-block">
@@ -397,20 +441,32 @@ function renderCard(dropIn) {
   });
 }
 
-function renderDone() {
-  // Should rarely hit — practice mode keeps the queue full.
+function renderAllKnown() {
   const game = loadGameState();
+  const known = knownSet(state.store).size;
+  const total = state.members.length;
+  const done = known >= total;
+
   els.stage.innerHTML = `
     <div class="empty">
       <div>
-        <h2>Session pause</h2>
+        <h2>${done ? "Roster clear" : "Band clear"}</h2>
         <p class="empty-rank">${escapeHtml(game.rankTitle || "")} · ${game.xp.toLocaleString()} XP</p>
-        <p>Study level <strong>${state.studyLevel}</strong> · <strong>${state.counts.unlocked}</strong> / ${state.members.length} faces unlocked.</p>
-        <p>Earn XP to unlock more of the Legislature. Keep drilling the faces you have.</p>
+        <p>
+          ${
+            done
+              ? `You've correctly ID'd all <strong>${total}</strong> members. Names can still show as wrong answers if you reset.`
+              : `You've locked in this unlock band (<strong>${known}</strong> known). Opening more faces…`
+          }
+        </p>
         <div class="empty-actions">
-          <button type="button" class="dock-btn know empty-btn" id="btn-keep">
-            <span class="dock-label">Keep drilling</span>
-          </button>
+          ${
+            !done
+              ? `<button type="button" class="dock-btn know empty-btn" id="btn-keep">
+                   <span class="dock-label">Continue</span>
+                 </button>`
+              : ""
+          }
           <button type="button" class="dock-btn flip empty-btn" id="btn-lb-done">
             <span class="dock-label">Leaderboard</span>
           </button>
@@ -420,19 +476,22 @@ function renderDone() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span class="dock-label">☕ Ko-fi</span>
+            <span class="dock-label">☕ buy me a ko-fi</span>
           </a>
         </div>
       </div>
     </div>
   `;
 
-  $("btn-keep")?.addEventListener("click", () => {
-    nextCard();
-  });
+  $("btn-keep")?.addEventListener("click", () => nextCard());
   $("btn-lb-done")?.addEventListener("click", () => {
     renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
   });
+
+  // If not fully done, auto-expand and continue after a beat
+  if (!done) {
+    setTimeout(() => nextCard(), 900);
+  }
 
   paintHUD();
 }

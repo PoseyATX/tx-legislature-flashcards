@@ -361,6 +361,8 @@ export function memberOrder(a, b) {
  * @property {Record<string, SrsCard>} cards
  * @property {string} newDay
  * @property {number} newIntroducedToday
+ * @property {string[]} knownIds  faces answered correctly — retired as prompts
+ * @property {number} rosterFloor  min unlock size (grows when a level is cleared)
  */
 
 /** @returns {SrsStore} */
@@ -374,19 +376,88 @@ export function loadStore() {
     for (const [id, c] of Object.entries(parsed.cards || {})) {
       cards[id] = normalizeCard({ .../** @type {object} */ (c), id });
     }
+    const knownIds = Array.isArray(parsed.knownIds)
+      ? parsed.knownIds.filter((x) => typeof x === "string")
+      : [];
     return {
       cards,
       newDay: parsed.newDay || dayKey(),
       newIntroducedToday: Number(parsed.newIntroducedToday) || 0,
+      knownIds,
+      rosterFloor: Math.max(ROSTER_BASE, Number(parsed.rosterFloor) || ROSTER_BASE),
     };
   } catch {
-    return { cards: {}, newDay: dayKey(), newIntroducedToday: 0 };
+    return {
+      cards: {},
+      newDay: dayKey(),
+      newIntroducedToday: 0,
+      knownIds: [],
+      rosterFloor: ROSTER_BASE,
+    };
   }
 }
 
 /** @param {SrsStore} store */
 export function saveStore(store) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      cards: store.cards,
+      newDay: store.newDay,
+      newIntroducedToday: store.newIntroducedToday,
+      knownIds: store.knownIds || [],
+      rosterFloor: store.rosterFloor || ROSTER_BASE,
+    })
+  );
+}
+
+/** @param {SrsStore} store */
+export function knownSet(store) {
+  return new Set(store.knownIds || []);
+}
+
+/**
+ * Mark a face as known — it will not be shown as a prompt again
+ * until the player resets progress. Names may still appear as distractors.
+ * @param {SrsStore} store
+ * @param {string} id
+ * @returns {boolean} true if newly marked
+ */
+export function markKnown(store, id) {
+  if (!store.knownIds) store.knownIds = [];
+  if (store.knownIds.includes(id)) return false;
+  store.knownIds.push(id);
+  return true;
+}
+
+/**
+ * Faces still to learn within an unlocked roster.
+ * @param {SrsStore} store
+ * @param {{ id: string }[]} unlocked
+ */
+export function unknownMembers(store, unlocked) {
+  const known = knownSet(store);
+  return unlocked.filter((m) => !known.has(m.id));
+}
+
+/**
+ * If every unlocked face is known, raise the roster floor so new faces unlock.
+ * @param {SrsStore} store
+ * @param {number} unlockedCount
+ * @param {number} totalMembers
+ * @returns {{ expanded: boolean, newFloor: number }}
+ */
+export function maybeExpandRoster(store, unlockedCount, totalMembers) {
+  const floor = Math.max(ROSTER_BASE, store.rosterFloor || ROSTER_BASE);
+  if (unlockedCount >= totalMembers) {
+    return { expanded: false, newFloor: floor };
+  }
+  const next = Math.min(totalMembers, unlockedCount + ROSTER_PER_LEVEL);
+  if (next > unlockedCount) {
+    store.rosterFloor = Math.max(floor, next);
+    return { expanded: true, newFloor: store.rosterFloor };
+  }
+  return { expanded: false, newFloor: floor };
 }
 
 /**

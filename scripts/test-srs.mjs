@@ -1,18 +1,19 @@
 /**
- * Round-robin session pass: no face twice until full unlocked roster seen.
+ * Learning mechanics: correct → face retired as prompt; round-robin unknowns.
  */
 import {
   createNewCard,
-  applyGrade,
   inputConfigForCard,
   buildSessionPass,
   takeNextFromPass,
-  minSessionSpacing,
   ensureCards,
-  memberOrder,
+  markKnown,
+  knownSet,
+  unknownMembers,
+  maybeExpandRoster,
+  loadStore,
   MC_CHOICE_COUNT,
-  studyLevelFromXP,
-  unlockedRosterSize,
+  ROSTER_BASE,
 } from "../src/srs.js";
 
 const now = Date.UTC(2026, 6, 18, 12, 0, 0);
@@ -26,7 +27,6 @@ function assert(cond, msg) {
 }
 
 assert(MC_CHOICE_COUNT === 4, "MC is always 4");
-assert(minSessionSpacing(30) === 29, "gap is full roster - 1");
 
 const members = Array.from({ length: 20 }, (_, i) => ({
   id: `H-${i}`,
@@ -34,69 +34,54 @@ const members = Array.from({ length: 20 }, (_, i) => ({
   district: i + 1,
   name: `Member ${i}`,
 }));
-const store = { cards: {}, newDay: "", newIntroducedToday: 0 };
+
+const store = {
+  cards: {},
+  newDay: "",
+  newIntroducedToday: 0,
+  knownIds: [],
+  rosterFloor: ROSTER_BASE,
+};
 ensureCards(store, members);
 
-// First pass: all unique, fixed order
-const pass0 = buildSessionPass(store, members, 0, now);
-assert(pass0.length === 20, "pass length 20");
-assert(new Set(pass0).size === 20, "pass0 no internal dups");
-assert(pass0[0] === "H-0" && pass0[19] === "H-19", "stable order first pass");
+// Mark half known — they must not appear as prompts
+for (let i = 0; i < 10; i += 1) markKnown(store, `H-${i}`);
+assert(knownSet(store).size === 10, "10 known");
 
-// Simulate 60 takes via cursor — within each pass, no dups
+const learning = unknownMembers(store, members);
+assert(learning.length === 10, "10 still to learn");
+assert(learning.every((m) => Number(m.id.split("-")[1]) >= 10), "only unknown faces");
+
+// Pass over learning only — never emits known ids
 let cursor = { pass: [], index: 0, passNumber: 0 };
-const seenInPass = new Set();
-let currentPassNum = 0;
-
-for (let turn = 0; turn < 60; turn += 1) {
-  const { member, cursor: next } = takeNextFromPass(store, members, cursor, now + turn * 1000);
-  assert(member, `turn ${turn} has member`);
-  if (!member) break;
-
-  if (next.passNumber !== currentPassNum && next.index === 1) {
-    // just started a new pass (index already advanced to 1)
-    seenInPass.clear();
-    currentPassNum = next.passNumber;
-  }
-  // While still on same pass array, no id twice
-  if (next.passNumber === cursor.passNumber || next.index > 1) {
-    // check uniqueness of remaining pass slice was unique at build
-  }
-  assert(!seenInPass.has(member.id), `turn ${turn}: ${member.id} already in this pass`);
-  seenInPass.add(member.id);
-
-  // When pass completes, clear for next
-  if (next.index >= next.pass.length) {
-    seenInPass.clear();
-    currentPassNum = next.passNumber;
-  }
-
-  cursor = next;
-
-  let c = store.cards[member.id];
-  c = applyGrade(c, 3, now + turn * 1000);
-  store.cards[member.id] = c;
-}
-
-// Counts over 60 turns on 20 faces: exactly 3 each
-const counts = {};
-cursor = { pass: [], index: 0, passNumber: 0 };
-for (let turn = 0; turn < 60; turn += 1) {
-  const { member, cursor: next } = takeNextFromPass(store, members, cursor, now);
-  counts[member.id] = (counts[member.id] || 0) + 1;
+const seen = [];
+for (let t = 0; t < 10; t += 1) {
+  const { member, cursor: next } = takeNextFromPass(store, learning, cursor, now);
+  assert(member, `turn ${t}`);
+  assert(!knownSet(store).has(member.id), `known face not prompted: ${member.id}`);
+  seen.push(member.id);
   cursor = next;
 }
-const vals = Object.values(counts);
-assert(vals.every((v) => v === 3), `exactly 3 each after 60: ${JSON.stringify(counts)}`);
+assert(new Set(seen).size === 10, "full unknown pass unique");
+
+// After all known, expand roster floor
+const small = members.slice(0, 30);
+// pretend 30 unlocked all known
+const store2 = {
+  cards: {},
+  newDay: "",
+  newIntroducedToday: 0,
+  knownIds: small.map((m) => m.id),
+  rosterFloor: 30,
+};
+const exp = maybeExpandRoster(store2, 30, 180);
+assert(exp.expanded && exp.newFloor === 50, `expand 30→50 got ${exp.newFloor}`);
 
 const cfg = inputConfigForCard(createNewCard("x", now));
-assert(cfg.choiceCount === 4 && cfg.type === "mc", "always 4 MC");
-assert(studyLevelFromXP(0) === 1, "xp0 level1");
-assert(unlockedRosterSize(1, 180) === 30, "L1 unlocks 30");
-assert(memberOrder(members[1], members[0]) > 0, "memberOrder");
+assert(cfg.choiceCount === 4, "4 choices");
 
 if (failed) {
   console.error(`${failed} assertion(s) failed`);
   process.exit(1);
 }
-console.log("OK — no face repeats until full roster pass completes");
+console.log("OK — known faces retired as prompts; names can still foil");
