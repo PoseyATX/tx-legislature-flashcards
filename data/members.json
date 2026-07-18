@@ -1,0 +1,1814 @@
+{
+  "meta": {
+    "houseSource": "https://house.texas.gov/members",
+    "senateSource": "https://senate.texas.gov/members.php",
+    "scrapedAt": "2026-07-18T15:15:53Z",
+    "legislature": "89th Legislature",
+    "houseCount": 150,
+    "senateCount": 30,
+    "totalCount": 180,
+    "notes": "Vacant seats are excluded. House party affiliation is not published on the official members list; Senate party is taken from the Senate directory."
+  },
+  "members": [
+    {
+      "id": "H-2540",
+      "name": "Gary VanDeaver",
+      "nameSort": "VanDeaver, Gary",
+      "chamber": "House",
+      "district": 1,
+      "photo": "https://house.texas.gov/images/members/2540.jpg",
+      "url": "https://house.texas.gov/members/2540",
+      "party": null
+    },
+    {
+      "id": "H-4670",
+      "name": "Brent Money",
+      "nameSort": "Money, Brent",
+      "chamber": "House",
+      "district": 2,
+      "photo": "https://house.texas.gov/images/members/4670.jpg",
+      "url": "https://house.texas.gov/members/4670",
+      "party": null
+    },
+    {
+      "id": "H-2335",
+      "name": "Cecil Bell Jr.",
+      "nameSort": "Bell Jr., Cecil",
+      "chamber": "House",
+      "district": 3,
+      "photo": "https://house.texas.gov/images/members/2335.jpg",
+      "url": "https://house.texas.gov/members/2335",
+      "party": null
+    },
+    {
+      "id": "H-3695",
+      "name": "Keith Bell",
+      "nameSort": "Bell, Keith",
+      "chamber": "House",
+      "district": 4,
+      "photo": "https://house.texas.gov/images/members/3695.jpg",
+      "url": "https://house.texas.gov/members/3695",
+      "party": null
+    },
+    {
+      "id": "H-3505",
+      "name": "Cole Hefner",
+      "nameSort": "Hefner, Cole",
+      "chamber": "House",
+      "district": 5,
+      "photo": "https://house.texas.gov/images/members/3505.jpg",
+      "url": "https://house.texas.gov/members/3505",
+      "party": null
+    },
+    {
+      "id": "H-4395",
+      "name": "Daniel Alders",
+      "nameSort": "Alders, Daniel",
+      "chamber": "House",
+      "district": 6,
+      "photo": "https://house.texas.gov/images/members/4395.jpg",
+      "url": "https://house.texas.gov/members/4395",
+      "party": null
+    },
+    {
+      "id": "H-3515",
+      "name": "Jay Dean",
+      "nameSort": "Dean, Jay",
+      "chamber": "House",
+      "district": 7,
+      "photo": "https://house.texas.gov/images/members/3515.jpg",
+      "url": "https://house.texas.gov/members/3515",
+      "party": null
+    },
+    {
+      "id": "H-3580",
+      "name": "Cody Harris",
+      "nameSort": "Harris, Cody",
+      "chamber": "House",
+      "district": 8,
+      "photo": "https://house.texas.gov/images/members/3580.jpg",
+      "url": "https://house.texas.gov/members/3580",
+      "party": null
+    },
+    {
+      "id": "H-2330",
+      "name": "Trent Ashby",
+      "nameSort": "Ashby, Trent",
+      "chamber": "House",
+      "district": 9,
+      "photo": "https://house.texas.gov/images/members/2330.jpg",
+      "url": "https://house.texas.gov/members/2330",
+      "party": null
+    },
+    {
+      "id": "H-4085",
+      "name": "Brian Harrison",
+      "nameSort": "Harrison, Brian",
+      "chamber": "House",
+      "district": 10,
+      "photo": "https://house.texas.gov/images/members/4085.jpg",
+      "url": "https://house.texas.gov/members/4085",
+      "party": null
+    },
+    {
+      "id": "H-4755",
+      "name": "Joanne Shofner",
+      "nameSort": "Shofner, Joanne",
+      "chamber": "House",
+      "district": 11,
+      "photo": "https://house.texas.gov/images/members/4755.jpg",
+      "url": "https://house.texas.gov/members/4755",
+      "party": null
+    },
+    {
+      "id": "H-4795",
+      "name": "Trey Wharton",
+      "nameSort": "Wharton, Trey",
+      "chamber": "House",
+      "district": 12,
+      "photo": "https://house.texas.gov/images/members/4795.jpg",
+      "url": "https://house.texas.gov/members/4795",
+      "party": null
+    },
+    {
+      "id": "H-4340",
+      "name": "Angelia Orr",
+      "nameSort": "Orr, Angelia",
+      "chamber": "House",
+      "district": 13,
+      "photo": "https://house.texas.gov/images/members/4340.jpg",
+      "url": "https://house.texas.gov/members/4340",
+      "party": null
+    },
+    {
+      "id": "H-4475",
+      "name": "Paul Dyson",
+      "nameSort": "Dyson, Paul",
+      "chamber": "House",
+      "district": 14,
+      "photo": "https://house.texas.gov/images/members/4475.jpg",
+      "url": "https://house.texas.gov/members/4475",
+      "party": null
+    },
+    {
+      "id": "H-2825",
+      "name": "Steve Toth",
+      "nameSort": "Toth, Steve",
+      "chamber": "House",
+      "district": 15,
+      "photo": "https://house.texas.gov/images/members/2825.jpg",
+      "url": "https://house.texas.gov/members/2825",
+      "party": null
+    },
+    {
+      "id": "H-2900",
+      "name": "Will Metcalf",
+      "nameSort": "Metcalf, Will",
+      "chamber": "House",
+      "district": 16,
+      "photo": "https://house.texas.gov/images/members/2900.jpg",
+      "url": "https://house.texas.gov/members/2900",
+      "party": null
+    },
+    {
+      "id": "H-4195",
+      "name": "Stan Gerdes",
+      "nameSort": "Gerdes, Stan",
+      "chamber": "House",
+      "district": 17,
+      "photo": "https://house.texas.gov/images/members/4195.jpg",
+      "url": "https://house.texas.gov/members/4195",
+      "party": null
+    },
+    {
+      "id": "H-4535",
+      "name": "Janis Holt",
+      "nameSort": "Holt, Janis",
+      "chamber": "House",
+      "district": 18,
+      "photo": "https://house.texas.gov/images/members/4535.jpg",
+      "url": "https://house.texas.gov/members/4535",
+      "party": null
+    },
+    {
+      "id": "H-4385",
+      "name": "Ellen Troxclair",
+      "nameSort": "Troxclair, Ellen",
+      "chamber": "House",
+      "district": 19,
+      "photo": "https://house.texas.gov/images/members/4385.jpg",
+      "url": "https://house.texas.gov/members/4385",
+      "party": null
+    },
+    {
+      "id": "H-3525",
+      "name": "Terry M. Wilson",
+      "nameSort": "Wilson, Terry M.",
+      "chamber": "House",
+      "district": 20,
+      "photo": "https://house.texas.gov/images/members/3525.jpg",
+      "url": "https://house.texas.gov/members/3525",
+      "party": null
+    },
+    {
+      "id": "H-2905",
+      "name": "Dade Phelan",
+      "nameSort": "Phelan, Dade",
+      "chamber": "House",
+      "district": 21,
+      "photo": "https://house.texas.gov/images/members/2905.jpg",
+      "url": "https://house.texas.gov/members/2905",
+      "party": null
+    },
+    {
+      "id": "H-4255",
+      "name": "Christian Manuel",
+      "nameSort": "Manuel, Christian",
+      "chamber": "House",
+      "district": 22,
+      "photo": "https://house.texas.gov/images/members/4255.jpg",
+      "url": "https://house.texas.gov/members/4255",
+      "party": null
+    },
+    {
+      "id": "H-4290",
+      "name": "Terri Leo Wilson",
+      "nameSort": "Leo Wilson, Terri",
+      "chamber": "House",
+      "district": 23,
+      "photo": "https://house.texas.gov/images/members/4290.jpg",
+      "url": "https://house.texas.gov/members/4290",
+      "party": null
+    },
+    {
+      "id": "H-2875",
+      "name": "Greg Bonnen",
+      "nameSort": "Bonnen, Greg",
+      "chamber": "House",
+      "district": 24,
+      "photo": "https://house.texas.gov/images/members/2875.jpg",
+      "url": "https://house.texas.gov/members/2875",
+      "party": null
+    },
+    {
+      "id": "H-4065",
+      "name": "Cody Vasut",
+      "nameSort": "Vasut, Cody",
+      "chamber": "House",
+      "district": 25,
+      "photo": "https://house.texas.gov/images/members/4065.jpg",
+      "url": "https://house.texas.gov/members/4065",
+      "party": null
+    },
+    {
+      "id": "H-4675",
+      "name": "Matt Morgan",
+      "nameSort": "Morgan, Matt",
+      "chamber": "House",
+      "district": 26,
+      "photo": "https://house.texas.gov/images/members/4675.jpg",
+      "url": "https://house.texas.gov/members/4675",
+      "party": null
+    },
+    {
+      "id": "H-2040",
+      "name": "Ron Reynolds",
+      "nameSort": "Reynolds, Ron",
+      "chamber": "House",
+      "district": 27,
+      "photo": "https://house.texas.gov/images/members/2040.jpg",
+      "url": "https://house.texas.gov/members/2040",
+      "party": null
+    },
+    {
+      "id": "H-3920",
+      "name": "Gary Gates",
+      "nameSort": "Gates, Gary",
+      "chamber": "House",
+      "district": 28,
+      "photo": "https://house.texas.gov/images/members/3920.jpg",
+      "url": "https://house.texas.gov/members/3920",
+      "party": null
+    },
+    {
+      "id": "H-4405",
+      "name": "Jeff Barry",
+      "nameSort": "Barry, Jeff",
+      "chamber": "House",
+      "district": 29,
+      "photo": "https://house.texas.gov/images/members/4405.jpg",
+      "url": "https://house.texas.gov/members/4405",
+      "party": null
+    },
+    {
+      "id": "H-4620",
+      "name": "AJ Louderback",
+      "nameSort": "Louderback, AJ",
+      "chamber": "House",
+      "district": 30,
+      "photo": "https://house.texas.gov/images/members/4620.jpg",
+      "url": "https://house.texas.gov/members/4620",
+      "party": null
+    },
+    {
+      "id": "H-3045",
+      "name": "Ryan Guillen",
+      "nameSort": "Guillen, Ryan",
+      "chamber": "House",
+      "district": 31,
+      "photo": "https://house.texas.gov/images/members/3045.jpg",
+      "url": "https://house.texas.gov/members/3045",
+      "party": null
+    },
+    {
+      "id": "H-3365",
+      "name": "Todd Hunter",
+      "nameSort": "Hunter, Todd ",
+      "chamber": "House",
+      "district": 32,
+      "photo": "https://house.texas.gov/images/members/3365.jpg",
+      "url": "https://house.texas.gov/members/3365",
+      "party": null
+    },
+    {
+      "id": "H-4715",
+      "name": "Katrina Pierson",
+      "nameSort": "Pierson, Katrina",
+      "chamber": "House",
+      "district": 33,
+      "photo": "https://house.texas.gov/images/members/4715.jpg",
+      "url": "https://house.texas.gov/members/4715",
+      "party": null
+    },
+    {
+      "id": "H-4770",
+      "name": "Denise Villalobos",
+      "nameSort": "Villalobos, Denise",
+      "chamber": "House",
+      "district": 34,
+      "photo": "https://house.texas.gov/images/members/4770.jpg",
+      "url": "https://house.texas.gov/members/4770",
+      "party": null
+    },
+    {
+      "id": "H-2485",
+      "name": "Oscar Longoria",
+      "nameSort": "Longoria, Oscar",
+      "chamber": "House",
+      "district": 35,
+      "photo": "https://house.texas.gov/images/members/2485.jpg",
+      "url": "https://house.texas.gov/members/2485",
+      "party": null
+    },
+    {
+      "id": "H-2060",
+      "name": "Sergio Muñoz Jr.",
+      "nameSort": "Muñoz Jr., Sergio",
+      "chamber": "House",
+      "district": 36,
+      "photo": "https://house.texas.gov/images/members/2060.jpg",
+      "url": "https://house.texas.gov/members/2060",
+      "party": null
+    },
+    {
+      "id": "H-4295",
+      "name": "Janie Lopez",
+      "nameSort": "Lopez, Janie",
+      "chamber": "House",
+      "district": 37,
+      "photo": "https://house.texas.gov/images/members/4295.jpg",
+      "url": "https://house.texas.gov/members/4295",
+      "party": null
+    },
+    {
+      "id": "H-4095",
+      "name": "Erin Gámez",
+      "nameSort": "Gámez, Erin",
+      "chamber": "House",
+      "district": 38,
+      "photo": "https://house.texas.gov/images/members/4095.jpg",
+      "url": "https://house.texas.gov/members/4095",
+      "party": null
+    },
+    {
+      "id": "H-3780",
+      "name": "Armando \"Mando\" Martinez",
+      "nameSort": "Martinez, Armando \"Mando\"",
+      "chamber": "House",
+      "district": 39,
+      "photo": "https://house.texas.gov/images/members/3780.jpg",
+      "url": "https://house.texas.gov/members/3780",
+      "party": null
+    },
+    {
+      "id": "H-2340",
+      "name": "Terry Canales",
+      "nameSort": "Canales, Terry",
+      "chamber": "House",
+      "district": 40,
+      "photo": "https://house.texas.gov/images/members/2340.jpg",
+      "url": "https://house.texas.gov/members/2340",
+      "party": null
+    },
+    {
+      "id": "H-2325",
+      "name": "R.D. \"Bobby\" Guerra",
+      "nameSort": "Guerra, R.D. \"Bobby\"",
+      "chamber": "House",
+      "district": 41,
+      "photo": "https://house.texas.gov/images/members/2325.jpg",
+      "url": "https://house.texas.gov/members/2325",
+      "party": null
+    },
+    {
+      "id": "H-4215",
+      "name": "Richard Peña Raymond",
+      "nameSort": "Raymond, Richard Peña",
+      "chamber": "House",
+      "district": 42,
+      "photo": "https://house.texas.gov/images/members/4215.jpg",
+      "url": "https://house.texas.gov/members/4215",
+      "party": null
+    },
+    {
+      "id": "H-2065",
+      "name": "J. M. Lozano",
+      "nameSort": "Lozano, J. M.",
+      "chamber": "House",
+      "district": 43,
+      "photo": "https://house.texas.gov/images/members/2065.jpg",
+      "url": "https://house.texas.gov/members/2065",
+      "party": null
+    },
+    {
+      "id": "H-4745",
+      "name": "Alan Schoolcraft",
+      "nameSort": "Schoolcraft, Alan",
+      "chamber": "House",
+      "district": 44,
+      "photo": "https://house.texas.gov/images/members/4745.jpg",
+      "url": "https://house.texas.gov/members/4745",
+      "party": null
+    },
+    {
+      "id": "H-3710",
+      "name": "Erin Zwiener",
+      "nameSort": "Zwiener, Erin",
+      "chamber": "House",
+      "district": 45,
+      "photo": "https://house.texas.gov/images/members/3710.jpg",
+      "url": "https://house.texas.gov/members/3710",
+      "party": null
+    },
+    {
+      "id": "H-3625",
+      "name": "Sheryl Cole",
+      "nameSort": "Cole, Sheryl",
+      "chamber": "House",
+      "district": 46,
+      "photo": "https://house.texas.gov/images/members/3625.jpg",
+      "url": "https://house.texas.gov/members/3625",
+      "party": null
+    },
+    {
+      "id": "H-3820",
+      "name": "Vikki Goodwin",
+      "nameSort": "Goodwin, Vikki",
+      "chamber": "House",
+      "district": 47,
+      "photo": "https://house.texas.gov/images/members/3820.jpg",
+      "url": "https://house.texas.gov/members/3820",
+      "party": null
+    },
+    {
+      "id": "H-3310",
+      "name": "Donna Howard",
+      "nameSort": "Howard, Donna",
+      "chamber": "House",
+      "district": 48,
+      "photo": "https://house.texas.gov/images/members/3310.jpg",
+      "url": "https://house.texas.gov/members/3310",
+      "party": null
+    },
+    {
+      "id": "H-3210",
+      "name": "Gina Hinojosa",
+      "nameSort": "Hinojosa, Gina",
+      "chamber": "House",
+      "district": 49,
+      "photo": "https://house.texas.gov/images/members/3210.jpg",
+      "url": "https://house.texas.gov/members/3210",
+      "party": null
+    },
+    {
+      "id": "H-3685",
+      "name": "James Talarico",
+      "nameSort": "Talarico, James",
+      "chamber": "House",
+      "district": 50,
+      "photo": "https://house.texas.gov/images/members/3685.jpg",
+      "url": "https://house.texas.gov/members/3685",
+      "party": null
+    },
+    {
+      "id": "H-4150",
+      "name": "Lulu Flores",
+      "nameSort": "Flores, Lulu",
+      "chamber": "House",
+      "district": 51,
+      "photo": "https://house.texas.gov/images/members/4150.jpg",
+      "url": "https://house.texas.gov/members/4150",
+      "party": null
+    },
+    {
+      "id": "H-4205",
+      "name": "Caroline Harris Davila",
+      "nameSort": "Harris Davila, Caroline ",
+      "chamber": "House",
+      "district": 52,
+      "photo": "https://house.texas.gov/images/members/4205.jpg",
+      "url": "https://house.texas.gov/members/4205",
+      "party": null
+    },
+    {
+      "id": "H-4775",
+      "name": "Wes Virdell",
+      "nameSort": "Virdell, Wes",
+      "chamber": "House",
+      "district": 53,
+      "photo": "https://house.texas.gov/images/members/4775.jpg",
+      "url": "https://house.texas.gov/members/4775",
+      "party": null
+    },
+    {
+      "id": "H-3585",
+      "name": "Brad Buckley",
+      "nameSort": "Buckley, Brad",
+      "chamber": "House",
+      "district": 54,
+      "photo": "https://house.texas.gov/images/members/3585.jpg",
+      "url": "https://house.texas.gov/members/3585",
+      "party": null
+    },
+    {
+      "id": "H-4520",
+      "name": "Hillary Hickland",
+      "nameSort": "Hickland, Hillary",
+      "chamber": "House",
+      "district": 55,
+      "photo": "https://house.texas.gov/images/members/4520.jpg",
+      "url": "https://house.texas.gov/members/4520",
+      "party": null
+    },
+    {
+      "id": "H-4415",
+      "name": "Pat Curry",
+      "nameSort": "Curry, Pat",
+      "chamber": "House",
+      "district": 56,
+      "photo": "https://house.texas.gov/images/members/4415.jpg",
+      "url": "https://house.texas.gov/members/4415",
+      "party": null
+    },
+    {
+      "id": "H-4165",
+      "name": "Richard Hayes",
+      "nameSort": "Hayes, Richard",
+      "chamber": "House",
+      "district": 57,
+      "photo": "https://house.texas.gov/images/members/4165.jpg",
+      "url": "https://house.texas.gov/members/4165",
+      "party": null
+    },
+    {
+      "id": "H-4575",
+      "name": "Helen Kerwin",
+      "nameSort": "Kerwin, Helen",
+      "chamber": "House",
+      "district": 58,
+      "photo": "https://house.texas.gov/images/members/4575.jpg",
+      "url": "https://house.texas.gov/members/4575",
+      "party": null
+    },
+    {
+      "id": "H-4055",
+      "name": "Shelby Slawson",
+      "nameSort": "Slawson, Shelby",
+      "chamber": "House",
+      "district": 59,
+      "photo": "https://house.texas.gov/images/members/4055.jpg",
+      "url": "https://house.texas.gov/members/4055",
+      "party": null
+    },
+    {
+      "id": "H-4705",
+      "name": "Mike Olcott",
+      "nameSort": "Olcott, Mike",
+      "chamber": "House",
+      "district": 60,
+      "photo": "https://house.texas.gov/images/members/4705.jpg",
+      "url": "https://house.texas.gov/members/4705",
+      "party": null
+    },
+    {
+      "id": "H-4735",
+      "name": "Keresa Richardson",
+      "nameSort": "Richardson, Keresa",
+      "chamber": "House",
+      "district": 61,
+      "photo": "https://house.texas.gov/images/members/4735.jpg",
+      "url": "https://house.texas.gov/members/4735",
+      "party": null
+    },
+    {
+      "id": "H-4645",
+      "name": "Shelley Luther",
+      "nameSort": "Luther, Shelley",
+      "chamber": "House",
+      "district": 62,
+      "photo": "https://house.texas.gov/images/members/4645.jpg",
+      "url": "https://house.texas.gov/members/4645",
+      "party": null
+    },
+    {
+      "id": "H-4125",
+      "name": "Benjamin Bumgarner",
+      "nameSort": "Bumgarner, Benjamin",
+      "chamber": "House",
+      "district": 63,
+      "photo": "https://house.texas.gov/images/members/4125.jpg",
+      "url": "https://house.texas.gov/members/4125",
+      "party": null
+    },
+    {
+      "id": "H-4555",
+      "name": "Andy Hopper",
+      "nameSort": "Hopper,  Andy",
+      "chamber": "House",
+      "district": 64,
+      "photo": "https://house.texas.gov/images/members/4555.jpg",
+      "url": "https://house.texas.gov/members/4555",
+      "party": null
+    },
+    {
+      "id": "H-4615",
+      "name": "Mitch Little",
+      "nameSort": "Little, Mitch ",
+      "chamber": "House",
+      "district": 65,
+      "photo": "https://house.texas.gov/images/members/4615.jpg",
+      "url": "https://house.texas.gov/members/4615",
+      "party": null
+    },
+    {
+      "id": "H-2995",
+      "name": "Matt Shaheen",
+      "nameSort": "Shaheen, Matt",
+      "chamber": "House",
+      "district": 66,
+      "photo": "https://house.texas.gov/images/members/2995.jpg",
+      "url": "https://house.texas.gov/members/2995",
+      "party": null
+    },
+    {
+      "id": "H-2475",
+      "name": "Jeff Leach",
+      "nameSort": "Leach, Jeff",
+      "chamber": "House",
+      "district": 67,
+      "photo": "https://house.texas.gov/images/members/2475.jpg",
+      "url": "https://house.texas.gov/members/2475",
+      "party": null
+    },
+    {
+      "id": "H-4075",
+      "name": "David Spiller",
+      "nameSort": "Spiller, David",
+      "chamber": "House",
+      "district": 68,
+      "photo": "https://house.texas.gov/images/members/4075.jpg",
+      "url": "https://house.texas.gov/members/4075",
+      "party": null
+    },
+    {
+      "id": "H-2385",
+      "name": "James Frank",
+      "nameSort": "Frank, James",
+      "chamber": "House",
+      "district": 69,
+      "photo": "https://house.texas.gov/images/members/2385.jpg",
+      "url": "https://house.texas.gov/members/2385",
+      "party": null
+    },
+    {
+      "id": "H-4345",
+      "name": "Mihaela Plesa",
+      "nameSort": "Plesa, Mihaela",
+      "chamber": "House",
+      "district": 70,
+      "photo": "https://house.texas.gov/images/members/4345.jpg",
+      "url": "https://house.texas.gov/members/4345",
+      "party": null
+    },
+    {
+      "id": "H-3225",
+      "name": "Stan Lambert",
+      "nameSort": "Lambert, Stan",
+      "chamber": "House",
+      "district": 71,
+      "photo": "https://house.texas.gov/images/members/3225.jpg",
+      "url": "https://house.texas.gov/members/3225",
+      "party": null
+    },
+    {
+      "id": "H-2645",
+      "name": "Drew Darby",
+      "nameSort": "Darby, Drew",
+      "chamber": "House",
+      "district": 72,
+      "photo": "https://house.texas.gov/images/members/2645.jpg",
+      "url": "https://house.texas.gov/members/2645",
+      "party": null
+    },
+    {
+      "id": "H-4265",
+      "name": "Carrie Isaac",
+      "nameSort": "Isaac, Carrie",
+      "chamber": "House",
+      "district": 73,
+      "photo": "https://house.texas.gov/images/members/4265.jpg",
+      "url": "https://house.texas.gov/members/4265",
+      "party": null
+    },
+    {
+      "id": "H-4000",
+      "name": "Eddie Morales",
+      "nameSort": "Morales, Eddie",
+      "chamber": "House",
+      "district": 74,
+      "photo": "https://house.texas.gov/images/members/4000.jpg",
+      "url": "https://house.texas.gov/members/4000",
+      "party": null
+    },
+    {
+      "id": "H-2410",
+      "name": "Mary E. González",
+      "nameSort": "González, Mary E.",
+      "chamber": "House",
+      "district": 75,
+      "photo": "https://house.texas.gov/images/members/2410.jpg",
+      "url": "https://house.texas.gov/members/2410",
+      "party": null
+    },
+    {
+      "id": "H-4285",
+      "name": "Suleman Lalani",
+      "nameSort": "Lalani, Suleman",
+      "chamber": "House",
+      "district": 76,
+      "photo": "https://house.texas.gov/images/members/4285.jpg",
+      "url": "https://house.texas.gov/members/4285",
+      "party": null
+    },
+    {
+      "id": "H-4710",
+      "name": "Vincent Perez",
+      "nameSort": "Perez, Vincent",
+      "chamber": "House",
+      "district": 77,
+      "photo": "https://house.texas.gov/images/members/4710.jpg",
+      "url": "https://house.texas.gov/members/4710",
+      "party": null
+    },
+    {
+      "id": "H-3850",
+      "name": "Joe Moody",
+      "nameSort": "Moody, Joe",
+      "chamber": "House",
+      "district": 78,
+      "photo": "https://house.texas.gov/images/members/3850.jpg",
+      "url": "https://house.texas.gov/members/3850",
+      "party": null
+    },
+    {
+      "id": "H-4015",
+      "name": "Claudia Ordaz",
+      "nameSort": "Ordaz, Claudia",
+      "chamber": "House",
+      "district": 79,
+      "photo": "https://house.texas.gov/images/members/4015.jpg",
+      "url": "https://house.texas.gov/members/4015",
+      "party": null
+    },
+    {
+      "id": "H-4655",
+      "name": "Don McLaughlin",
+      "nameSort": "McLaughlin, Don",
+      "chamber": "House",
+      "district": 80,
+      "photo": "https://house.texas.gov/images/members/4655.jpg",
+      "url": "https://house.texas.gov/members/4655",
+      "party": null
+    },
+    {
+      "id": "H-3040",
+      "name": "Brooks Landgraf",
+      "nameSort": "Landgraf, Brooks",
+      "chamber": "House",
+      "district": 81,
+      "photo": "https://house.texas.gov/images/members/3040.jpg",
+      "url": "https://house.texas.gov/members/3040",
+      "party": null
+    },
+    {
+      "id": "H-2610",
+      "name": "Tom Craddick",
+      "nameSort": "Craddick, Tom",
+      "chamber": "House",
+      "district": 82,
+      "photo": "https://house.texas.gov/images/members/2610.jpg",
+      "url": "https://house.texas.gov/members/2610",
+      "party": null
+    },
+    {
+      "id": "H-3055",
+      "name": "Dustin Burrows",
+      "nameSort": "Burrows, Dustin",
+      "chamber": "House",
+      "district": 83,
+      "photo": "https://house.texas.gov/images/members/3055.jpg",
+      "url": "https://house.texas.gov/members/3055",
+      "party": null
+    },
+    {
+      "id": "H-4360",
+      "name": "Carl H. Tepper",
+      "nameSort": "Tepper, Carl H.",
+      "chamber": "House",
+      "district": 84,
+      "photo": "https://house.texas.gov/images/members/4360.jpg",
+      "url": "https://house.texas.gov/members/4360",
+      "party": null
+    },
+    {
+      "id": "H-4280",
+      "name": "Stan Kitzman",
+      "nameSort": "Kitzman, Stan",
+      "chamber": "House",
+      "district": 85,
+      "photo": "https://house.texas.gov/images/members/4280.jpg",
+      "url": "https://house.texas.gov/members/4280",
+      "party": null
+    },
+    {
+      "id": "H-4530",
+      "name": "John T. Smithee",
+      "nameSort": "Smithee, John T.",
+      "chamber": "House",
+      "district": 86,
+      "photo": "https://house.texas.gov/images/members/4530.jpg",
+      "url": "https://house.texas.gov/members/4530",
+      "party": null
+    },
+    {
+      "id": "H-4480",
+      "name": "Caroline Fairly",
+      "nameSort": "Fairly, Caroline",
+      "chamber": "House",
+      "district": 87,
+      "photo": "https://house.texas.gov/images/members/4480.jpg",
+      "url": "https://house.texas.gov/members/4480",
+      "party": null
+    },
+    {
+      "id": "H-2455",
+      "name": "Ken King",
+      "nameSort": "King, Ken",
+      "chamber": "House",
+      "district": 88,
+      "photo": "https://house.texas.gov/images/members/2455.jpg",
+      "url": "https://house.texas.gov/members/2455",
+      "party": null
+    },
+    {
+      "id": "H-3740",
+      "name": "Candy Noble",
+      "nameSort": "Noble, Candy",
+      "chamber": "House",
+      "district": 89,
+      "photo": "https://house.texas.gov/images/members/3740.jpg",
+      "url": "https://house.texas.gov/members/3740",
+      "party": null
+    },
+    {
+      "id": "H-3060",
+      "name": "Ramon Romero Jr.",
+      "nameSort": "Romero Jr., Ramon",
+      "chamber": "House",
+      "district": 90,
+      "photo": "https://house.texas.gov/images/members/3060.jpg",
+      "url": "https://house.texas.gov/members/3060",
+      "party": null
+    },
+    {
+      "id": "H-4643",
+      "name": "David Lowe",
+      "nameSort": "Lowe, David",
+      "chamber": "House",
+      "district": 91,
+      "photo": "https://house.texas.gov/images/members/4643.jpg",
+      "url": "https://house.texas.gov/members/4643",
+      "party": null
+    },
+    {
+      "id": "H-4115",
+      "name": "Salman Bhojani",
+      "nameSort": "Bhojani, Salman ",
+      "chamber": "House",
+      "district": 92,
+      "photo": "https://house.texas.gov/images/members/4115.jpg",
+      "url": "https://house.texas.gov/members/4115",
+      "party": null
+    },
+    {
+      "id": "H-4355",
+      "name": "Nate Schatzline",
+      "nameSort": "Schatzline, Nate ",
+      "chamber": "House",
+      "district": 93,
+      "photo": "https://house.texas.gov/images/members/4355.jpg",
+      "url": "https://house.texas.gov/members/4355",
+      "party": null
+    },
+    {
+      "id": "H-3065",
+      "name": "Tony Tinderholt",
+      "nameSort": "Tinderholt, Tony",
+      "chamber": "House",
+      "district": 94,
+      "photo": "https://house.texas.gov/images/members/3065.jpg",
+      "url": "https://house.texas.gov/members/3065",
+      "party": null
+    },
+    {
+      "id": "H-2360",
+      "name": "Nicole Collier",
+      "nameSort": "Collier, Nicole",
+      "chamber": "House",
+      "district": 95,
+      "photo": "https://house.texas.gov/images/members/2360.jpg",
+      "url": "https://house.texas.gov/members/2360",
+      "party": null
+    },
+    {
+      "id": "H-3960",
+      "name": "David Cook",
+      "nameSort": "Cook, David",
+      "chamber": "House",
+      "district": 96,
+      "photo": "https://house.texas.gov/images/members/3960.jpg",
+      "url": "https://house.texas.gov/members/3960",
+      "party": null
+    },
+    {
+      "id": "H-4665",
+      "name": "John McQueeney",
+      "nameSort": "McQueeney, John",
+      "chamber": "House",
+      "district": 97,
+      "photo": "https://house.texas.gov/images/members/4665.jpg",
+      "url": "https://house.texas.gov/members/4665",
+      "party": null
+    },
+    {
+      "id": "H-2345",
+      "name": "Giovanni Capriglione",
+      "nameSort": "Capriglione, Giovanni",
+      "chamber": "House",
+      "district": 98,
+      "photo": "https://house.texas.gov/images/members/2345.jpg",
+      "url": "https://house.texas.gov/members/2345",
+      "party": null
+    },
+    {
+      "id": "H-2945",
+      "name": "Charlie Geren",
+      "nameSort": "Geren, Charlie",
+      "chamber": "House",
+      "district": 99,
+      "photo": "https://house.texas.gov/images/members/2945.jpg",
+      "url": "https://house.texas.gov/members/2945",
+      "party": null
+    },
+    {
+      "id": "H-4275",
+      "name": "Venton Jones",
+      "nameSort": "Jones, Venton",
+      "chamber": "House",
+      "district": 100,
+      "photo": "https://house.texas.gov/images/members/4275.jpg",
+      "url": "https://house.texas.gov/members/4275",
+      "party": null
+    },
+    {
+      "id": "H-4680",
+      "name": "Chris Turner",
+      "nameSort": "Turner, Chris",
+      "chamber": "House",
+      "district": 101,
+      "photo": "https://house.texas.gov/images/members/4680.jpg",
+      "url": "https://house.texas.gov/members/4680",
+      "party": null
+    },
+    {
+      "id": "H-3735",
+      "name": "Ana-María Rodríguez Ramos",
+      "nameSort": "Rodríguez Ramos, Ana-María ",
+      "chamber": "House",
+      "district": 102,
+      "photo": "https://house.texas.gov/images/members/3735.jpg",
+      "url": "https://house.texas.gov/members/3735",
+      "party": null
+    },
+    {
+      "id": "H-2150",
+      "name": "Rafael Anchía",
+      "nameSort": "Anchía, Rafael",
+      "chamber": "House",
+      "district": 103,
+      "photo": "https://house.texas.gov/images/members/2150.jpg",
+      "url": "https://house.texas.gov/members/2150",
+      "party": null
+    },
+    {
+      "id": "H-3335",
+      "name": "Jessica González",
+      "nameSort": "González, Jessica",
+      "chamber": "House",
+      "district": 104,
+      "photo": "https://house.texas.gov/images/members/3335.jpg",
+      "url": "https://house.texas.gov/members/3335",
+      "party": null
+    },
+    {
+      "id": "H-3455",
+      "name": "Terry Meza",
+      "nameSort": "Meza, Terry",
+      "chamber": "House",
+      "district": 105,
+      "photo": "https://house.texas.gov/images/members/3455.jpg",
+      "url": "https://house.texas.gov/members/3455",
+      "party": null
+    },
+    {
+      "id": "H-3655",
+      "name": "Jared Patterson",
+      "nameSort": "Patterson, Jared",
+      "chamber": "House",
+      "district": 106,
+      "photo": "https://house.texas.gov/images/members/3655.jpg",
+      "url": "https://house.texas.gov/members/3655",
+      "party": null
+    },
+    {
+      "id": "H-4485",
+      "name": "Linda Garcia",
+      "nameSort": "Garcia, Linda",
+      "chamber": "House",
+      "district": 107,
+      "photo": "https://house.texas.gov/images/members/4485.jpg",
+      "url": "https://house.texas.gov/members/4485",
+      "party": null
+    },
+    {
+      "id": "H-3075",
+      "name": "Morgan Meyer",
+      "nameSort": "Meyer, Morgan",
+      "chamber": "House",
+      "district": 108,
+      "photo": "https://house.texas.gov/images/members/3075.jpg",
+      "url": "https://house.texas.gov/members/3075",
+      "party": null
+    },
+    {
+      "id": "H-4465",
+      "name": "Aicha Davis",
+      "nameSort": "Davis, Aicha",
+      "chamber": "House",
+      "district": 109,
+      "photo": "https://house.texas.gov/images/members/4465.jpg",
+      "url": "https://house.texas.gov/members/4465",
+      "party": null
+    },
+    {
+      "id": "H-2555",
+      "name": "Toni Rose",
+      "nameSort": "Rose, Toni",
+      "chamber": "House",
+      "district": 110,
+      "photo": "https://house.texas.gov/images/members/2555.jpg",
+      "url": "https://house.texas.gov/members/2555",
+      "party": null
+    },
+    {
+      "id": "H-2625",
+      "name": "Yvonne Davis",
+      "nameSort": "Davis, Yvonne",
+      "chamber": "House",
+      "district": 111,
+      "photo": "https://house.texas.gov/images/members/2625.jpg",
+      "url": "https://house.texas.gov/members/2625",
+      "party": null
+    },
+    {
+      "id": "H-2510",
+      "name": "Angie Chen Button",
+      "nameSort": "Button, Angie Chen",
+      "chamber": "House",
+      "district": 112,
+      "photo": "https://house.texas.gov/images/members/2510.jpg",
+      "url": "https://house.texas.gov/members/2510",
+      "party": null
+    },
+    {
+      "id": "H-3565",
+      "name": "Rhetta Andrews Bowers",
+      "nameSort": "Bowers, Rhetta Andrews",
+      "chamber": "House",
+      "district": 113,
+      "photo": "https://house.texas.gov/images/members/3565.jpg",
+      "url": "https://house.texas.gov/members/3565",
+      "party": null
+    },
+    {
+      "id": "H-4120",
+      "name": "John Bryant",
+      "nameSort": "Bryant, John",
+      "chamber": "House",
+      "district": 114,
+      "photo": "https://house.texas.gov/images/members/4120.jpg",
+      "url": "https://house.texas.gov/members/4120",
+      "party": null
+    },
+    {
+      "id": "H-4495",
+      "name": "Cassandra Garcia Hernandez",
+      "nameSort": "Garcia Hernandez, Cassandra",
+      "chamber": "House",
+      "district": 115,
+      "photo": "https://house.texas.gov/images/members/4495.jpg",
+      "url": "https://house.texas.gov/members/4495",
+      "party": null
+    },
+    {
+      "id": "H-2835",
+      "name": "Trey Martinez Fischer",
+      "nameSort": "Martinez Fischer, Trey",
+      "chamber": "House",
+      "district": 116,
+      "photo": "https://house.texas.gov/images/members/2835.jpg",
+      "url": "https://house.texas.gov/members/2835",
+      "party": null
+    },
+    {
+      "id": "H-2365",
+      "name": "Philip Cortez",
+      "nameSort": "Cortez, Philip",
+      "chamber": "House",
+      "district": 117,
+      "photo": "https://house.texas.gov/images/members/2365.jpg",
+      "url": "https://house.texas.gov/members/2365",
+      "party": null
+    },
+    {
+      "id": "H-3145",
+      "name": "John Lujan",
+      "nameSort": "Lujan, John",
+      "chamber": "House",
+      "district": 118,
+      "photo": "https://house.texas.gov/images/members/3145.jpg",
+      "url": "https://house.texas.gov/members/3145",
+      "party": null
+    },
+    {
+      "id": "H-3950",
+      "name": "Elizabeth \"Liz\" Campos",
+      "nameSort": "Campos, Elizabeth \"Liz\"",
+      "chamber": "House",
+      "district": 119,
+      "photo": "https://house.texas.gov/images/members/3950.jpg",
+      "url": "https://house.texas.gov/members/3950",
+      "party": null
+    },
+    {
+      "id": "H-3445",
+      "name": "Barbara Gervin-Hawkins",
+      "nameSort": "Gervin-Hawkins, Barbara ",
+      "chamber": "House",
+      "district": 120,
+      "photo": "https://house.texas.gov/images/members/3445.jpg",
+      "url": "https://house.texas.gov/members/3445",
+      "party": null
+    },
+    {
+      "id": "H-4595",
+      "name": "Marc LaHood",
+      "nameSort": "LaHood, Marc",
+      "chamber": "House",
+      "district": 121,
+      "photo": "https://house.texas.gov/images/members/4595.jpg",
+      "url": "https://house.texas.gov/members/4595",
+      "party": null
+    },
+    {
+      "id": "H-4145",
+      "name": "Mark Dorazio",
+      "nameSort": "Dorazio, Mark",
+      "chamber": "House",
+      "district": 122,
+      "photo": "https://house.texas.gov/images/members/4145.jpg",
+      "url": "https://house.texas.gov/members/4145",
+      "party": null
+    },
+    {
+      "id": "H-3110",
+      "name": "Diego M. Bernal",
+      "nameSort": "Bernal, Diego M.",
+      "chamber": "House",
+      "district": 123,
+      "photo": "https://house.texas.gov/images/members/3110.jpg",
+      "url": "https://house.texas.gov/members/3110",
+      "party": null
+    },
+    {
+      "id": "H-4170",
+      "name": "Josey Garcia",
+      "nameSort": "Garcia, Josey",
+      "chamber": "House",
+      "district": 124,
+      "photo": "https://house.texas.gov/images/members/4170.jpg",
+      "url": "https://house.texas.gov/members/4170",
+      "party": null
+    },
+    {
+      "id": "H-3915",
+      "name": "Ray Lopez",
+      "nameSort": "Lopez, Ray",
+      "chamber": "House",
+      "district": 125,
+      "photo": "https://house.texas.gov/images/members/3915.jpg",
+      "url": "https://house.texas.gov/members/3915",
+      "party": null
+    },
+    {
+      "id": "H-3775",
+      "name": "Sam Harless",
+      "nameSort": "Harless, Sam",
+      "chamber": "House",
+      "district": 126,
+      "photo": "https://house.texas.gov/images/members/3775.jpg",
+      "url": "https://house.texas.gov/members/3775",
+      "party": null
+    },
+    {
+      "id": "H-4130",
+      "name": "Charles Cunningham",
+      "nameSort": "Cunningham, Charles",
+      "chamber": "House",
+      "district": 127,
+      "photo": "https://house.texas.gov/images/members/4130.jpg",
+      "url": "https://house.texas.gov/members/4130",
+      "party": null
+    },
+    {
+      "id": "H-3265",
+      "name": "Briscoe Cain",
+      "nameSort": "Cain, Briscoe",
+      "chamber": "House",
+      "district": 128,
+      "photo": "https://house.texas.gov/images/members/3265.jpg",
+      "url": "https://house.texas.gov/members/3265",
+      "party": null
+    },
+    {
+      "id": "H-3090",
+      "name": "Dennis Paul",
+      "nameSort": "Paul, Dennis",
+      "chamber": "House",
+      "district": 129,
+      "photo": "https://house.texas.gov/images/members/3090.jpg",
+      "url": "https://house.texas.gov/members/3090",
+      "party": null
+    },
+    {
+      "id": "H-3535",
+      "name": "Tom Oliverson",
+      "nameSort": "Oliverson, Tom",
+      "chamber": "House",
+      "district": 130,
+      "photo": "https://house.texas.gov/images/members/3535.jpg",
+      "url": "https://house.texas.gov/members/3535",
+      "party": null
+    },
+    {
+      "id": "H-2100",
+      "name": "Alma A. Allen",
+      "nameSort": "Allen, Alma A.",
+      "chamber": "House",
+      "district": 131,
+      "photo": "https://house.texas.gov/images/members/2100.jpg",
+      "url": "https://house.texas.gov/members/2100",
+      "party": null
+    },
+    {
+      "id": "H-3095",
+      "name": "Mike Schofield",
+      "nameSort": "Schofield, Mike",
+      "chamber": "House",
+      "district": 132,
+      "photo": "https://house.texas.gov/images/members/3095.jpg",
+      "url": "https://house.texas.gov/members/3095",
+      "party": null
+    },
+    {
+      "id": "H-4135",
+      "name": "Mano DeAyala",
+      "nameSort": "DeAyala, Mano",
+      "chamber": "House",
+      "district": 133,
+      "photo": "https://house.texas.gov/images/members/4135.jpg",
+      "url": "https://house.texas.gov/members/4135",
+      "party": null
+    },
+    {
+      "id": "H-3985",
+      "name": "Ann Johnson",
+      "nameSort": "Johnson, Ann",
+      "chamber": "House",
+      "district": 134,
+      "photo": "https://house.texas.gov/images/members/3985.jpg",
+      "url": "https://house.texas.gov/members/3985",
+      "party": null
+    },
+    {
+      "id": "H-3635",
+      "name": "Jon E. Rosenthal",
+      "nameSort": "Rosenthal, Jon E.",
+      "chamber": "House",
+      "district": 135,
+      "photo": "https://house.texas.gov/images/members/3635.jpg",
+      "url": "https://house.texas.gov/members/3635",
+      "party": null
+    },
+    {
+      "id": "H-3595",
+      "name": "John H. Bucy lll",
+      "nameSort": "Bucy lll, John H.",
+      "chamber": "House",
+      "district": 136,
+      "photo": "https://house.texas.gov/images/members/3595.jpg",
+      "url": "https://house.texas.gov/members/3595",
+      "party": null
+    },
+    {
+      "id": "H-2865",
+      "name": "Gene Wu",
+      "nameSort": "Wu, Gene",
+      "chamber": "House",
+      "district": 137,
+      "photo": "https://house.texas.gov/images/members/2865.jpg",
+      "url": "https://house.texas.gov/members/2865",
+      "party": null
+    },
+    {
+      "id": "H-3975",
+      "name": "Lacey Hull",
+      "nameSort": "Hull, Lacey",
+      "chamber": "House",
+      "district": 138,
+      "photo": "https://house.texas.gov/images/members/3975.jpg",
+      "url": "https://house.texas.gov/members/3975",
+      "party": null
+    },
+    {
+      "id": "H-4785",
+      "name": "Charlene Ward Johnson",
+      "nameSort": "Ward Johnson, Charlene ",
+      "chamber": "House",
+      "district": 139,
+      "photo": "https://house.texas.gov/images/members/4785.jpg",
+      "url": "https://house.texas.gov/members/4785",
+      "party": null
+    },
+    {
+      "id": "H-4930",
+      "name": "Armando Walle",
+      "nameSort": "Walle, Armando",
+      "chamber": "House",
+      "district": 140,
+      "photo": "https://house.texas.gov/images/members/4930.jpg",
+      "url": "https://house.texas.gov/members/4930",
+      "party": null
+    },
+    {
+      "id": "H-4630",
+      "name": "Senfronia Thompson",
+      "nameSort": "Thompson, Senfronia",
+      "chamber": "House",
+      "district": 141,
+      "photo": "https://house.texas.gov/images/members/4630.jpg",
+      "url": "https://house.texas.gov/members/4630",
+      "party": null
+    },
+    {
+      "id": "H-2650",
+      "name": "Harold V. Dutton Jr.",
+      "nameSort": "Dutton Jr., Harold V.",
+      "chamber": "House",
+      "district": 142,
+      "photo": "https://house.texas.gov/images/members/2650.jpg",
+      "url": "https://house.texas.gov/members/2650",
+      "party": null
+    },
+    {
+      "id": "H-3155",
+      "name": "Ana Hernandez",
+      "nameSort": "Hernandez, Ana",
+      "chamber": "House",
+      "district": 143,
+      "photo": "https://house.texas.gov/images/members/3155.jpg",
+      "url": "https://house.texas.gov/members/3155",
+      "party": null
+    },
+    {
+      "id": "H-2535",
+      "name": "Mary Ann Perez",
+      "nameSort": "Perez, Mary Ann",
+      "chamber": "House",
+      "district": 144,
+      "photo": "https://house.texas.gov/images/members/2535.jpg",
+      "url": "https://house.texas.gov/members/2535",
+      "party": null
+    },
+    {
+      "id": "H-3910",
+      "name": "Christina Morales",
+      "nameSort": "Morales, Christina",
+      "chamber": "House",
+      "district": 145,
+      "photo": "https://house.texas.gov/images/members/3910.jpg",
+      "url": "https://house.texas.gov/members/3910",
+      "party": null
+    },
+    {
+      "id": "H-4765",
+      "name": "Lauren Ashley Simmons",
+      "nameSort": "Simmons, Lauren Ashley",
+      "chamber": "House",
+      "district": 146,
+      "photo": "https://house.texas.gov/images/members/4765.jpg",
+      "url": "https://house.texas.gov/members/4765",
+      "party": null
+    },
+    {
+      "id": "H-4105",
+      "name": "Jolanda \"Jo\" Jones",
+      "nameSort": "Jones, Jolanda \"Jo\"",
+      "chamber": "House",
+      "district": 147,
+      "photo": "https://house.texas.gov/images/members/4105.jpg",
+      "url": "https://house.texas.gov/members/4105",
+      "party": null
+    },
+    {
+      "id": "H-4035",
+      "name": "Penny Morales Shaw",
+      "nameSort": "Morales Shaw, Penny",
+      "chamber": "House",
+      "district": 148,
+      "photo": "https://house.texas.gov/images/members/4035.jpg",
+      "url": "https://house.texas.gov/members/4035",
+      "party": null
+    },
+    {
+      "id": "H-4900",
+      "name": "Hubert Vo",
+      "nameSort": "Vo, Hubert",
+      "chamber": "House",
+      "district": 149,
+      "photo": "https://house.texas.gov/images/members/4900.jpg",
+      "url": "https://house.texas.gov/members/4900",
+      "party": null
+    },
+    {
+      "id": "H-3425",
+      "name": "Valoree Swanson",
+      "nameSort": "Swanson, Valoree",
+      "chamber": "House",
+      "district": 150,
+      "photo": "https://house.texas.gov/images/members/3425.jpg",
+      "url": "https://house.texas.gov/members/3425",
+      "party": null
+    },
+    {
+      "id": "S-1",
+      "name": "Bryan Hughes",
+      "nameSort": "Bryan Hughes",
+      "chamber": "Senate",
+      "district": 1,
+      "photo": "https://senate.texas.gov/members/d01/img/Hughes_86-0702D-030-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=1",
+      "party": "Republican"
+    },
+    {
+      "id": "S-2",
+      "name": "Bob Hall",
+      "nameSort": "Bob Hall",
+      "chamber": "Senate",
+      "district": 2,
+      "photo": "https://senate.texas.gov/members/d02/img/headshot.jpg",
+      "url": "https://senate.texas.gov/member.php?d=2",
+      "party": "Republican"
+    },
+    {
+      "id": "S-3",
+      "name": "Robert Nichols",
+      "nameSort": "Robert Nichols",
+      "chamber": "Senate",
+      "district": 3,
+      "photo": "https://senate.texas.gov/members/d03/img/headshot.jpg",
+      "url": "https://senate.texas.gov/member.php?d=3",
+      "party": "Republican"
+    },
+    {
+      "id": "S-4",
+      "name": "Brett Ligon",
+      "nameSort": "Brett Ligon",
+      "chamber": "Senate",
+      "district": 4,
+      "photo": "https://senate.texas.gov/members/d04/img/Ligon_Brett_Headshot_web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=4",
+      "party": "Republican"
+    },
+    {
+      "id": "S-5",
+      "name": "Charles Schwertner",
+      "nameSort": "Charles Schwertner",
+      "chamber": "Senate",
+      "district": 5,
+      "photo": "https://senate.texas.gov/members/d05/img/headshot.jpg",
+      "url": "https://senate.texas.gov/member.php?d=5",
+      "party": "Republican"
+    },
+    {
+      "id": "S-6",
+      "name": "Carol Alvarado",
+      "nameSort": "Carol Alvarado",
+      "chamber": "Senate",
+      "district": 6,
+      "photo": "https://senate.texas.gov/members/d06/img/CA-2018_web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=6",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-7",
+      "name": "Paul Bettencourt",
+      "nameSort": "Paul Bettencourt",
+      "chamber": "Senate",
+      "district": 7,
+      "photo": "https://senate.texas.gov/members/d07/img/headshot.jpg",
+      "url": "https://senate.texas.gov/member.php?d=7",
+      "party": "Republican"
+    },
+    {
+      "id": "S-8",
+      "name": "Angela Paxton",
+      "nameSort": "Angela Paxton",
+      "chamber": "Senate",
+      "district": 8,
+      "photo": "https://senate.texas.gov/members/d08/img/Paxton_2026.jpg",
+      "url": "https://senate.texas.gov/member.php?d=8",
+      "party": "Republican"
+    },
+    {
+      "id": "S-9",
+      "name": "Taylor Rehmet",
+      "nameSort": "Taylor Rehmet",
+      "chamber": "Senate",
+      "district": 9,
+      "photo": "https://senate.texas.gov/members/d09/img/Rehmet-89-0739D-017-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=9",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-10",
+      "name": "Phil King",
+      "nameSort": "Phil King",
+      "chamber": "Senate",
+      "district": 10,
+      "photo": "https://senate.texas.gov/members/d10/img/King_88-0550D-004-WEB.jpg",
+      "url": "https://senate.texas.gov/member.php?d=10",
+      "party": "Republican"
+    },
+    {
+      "id": "S-11",
+      "name": "Mayes Middleton",
+      "nameSort": "Mayes Middleton",
+      "chamber": "Senate",
+      "district": 11,
+      "photo": "https://senate.texas.gov/members/d11/img/Middleton_87-0662D-009.jpg",
+      "url": "https://senate.texas.gov/member.php?d=11",
+      "party": "Republican"
+    },
+    {
+      "id": "S-12",
+      "name": "Tan Parker",
+      "nameSort": "Tan Parker",
+      "chamber": "Senate",
+      "district": 12,
+      "photo": "https://senate.texas.gov/members/d12/img/86_20190619_SAM_0008.jpg",
+      "url": "https://senate.texas.gov/member.php?d=12",
+      "party": "Republican"
+    },
+    {
+      "id": "S-13",
+      "name": "Borris Miles",
+      "nameSort": "Borris Miles",
+      "chamber": "Senate",
+      "district": 13,
+      "photo": "https://senate.texas.gov/members/d13/img/Sen-Miles-2025-Headshot-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=13",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-14",
+      "name": "Sarah Eckhardt",
+      "nameSort": "Sarah Eckhardt",
+      "chamber": "Senate",
+      "district": 14,
+      "photo": "https://senate.texas.gov/members/d14/img/SE_headshot_2020.jpg",
+      "url": "https://senate.texas.gov/member.php?d=14",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-15",
+      "name": "Molly Cook",
+      "nameSort": "Molly Cook",
+      "chamber": "Senate",
+      "district": 15,
+      "photo": "https://senate.texas.gov/members/d15/img/Cook_88-0807D-014-2025.jpg",
+      "url": "https://senate.texas.gov/member.php?d=15",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-16",
+      "name": "Nathan Johnson",
+      "nameSort": "Nathan Johnson",
+      "chamber": "Senate",
+      "district": 16,
+      "photo": "https://senate.texas.gov/members/d16/img/SNJ-Headshot-2023-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=16",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-17",
+      "name": "Joan Huffman",
+      "nameSort": "Joan Huffman",
+      "chamber": "Senate",
+      "district": 17,
+      "photo": "https://senate.texas.gov/members/d17/img/Huffman_9S5A0096-2021web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=17",
+      "party": "Republican"
+    },
+    {
+      "id": "S-18",
+      "name": "Lois Kolkhorst",
+      "nameSort": "Lois Kolkhorst",
+      "chamber": "Senate",
+      "district": 18,
+      "photo": "https://senate.texas.gov/members/d18/img/LWK-headshot-2026-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=18",
+      "party": "Republican"
+    },
+    {
+      "id": "S-19",
+      "name": "Roland Gutierrez",
+      "nameSort": "Roland Gutierrez",
+      "chamber": "Senate",
+      "district": 19,
+      "photo": "https://senate.texas.gov/members/d19/img/Gutierrez_87-0522D-016-Web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=19",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-20",
+      "name": "Juan \"Chuy\" Hinojosa",
+      "nameSort": "Juan \"Chuy\" Hinojosa",
+      "chamber": "Senate",
+      "district": 20,
+      "photo": "https://senate.texas.gov/members/d20/img/Hinojosa_84-0784D-006.jpg",
+      "url": "https://senate.texas.gov/member.php?d=20",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-21",
+      "name": "Judith Zaffirini",
+      "nameSort": "Judith Zaffirini",
+      "chamber": "Senate",
+      "district": 21,
+      "photo": "https://senate.texas.gov/members/d21/img/Zaffirini_2017.jpg",
+      "url": "https://senate.texas.gov/member.php?d=21",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-23",
+      "name": "Royce West",
+      "nameSort": "Royce West",
+      "chamber": "Senate",
+      "district": 23,
+      "photo": "https://senate.texas.gov/members/d23/img/West_87-0474D-015-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=23",
+      "party": null
+    },
+    {
+      "id": "S-24",
+      "name": "Pete Flores",
+      "nameSort": "Pete Flores",
+      "chamber": "Senate",
+      "district": 24,
+      "photo": "https://senate.texas.gov/members/d24/img/Flores_86-0634D-001-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=24",
+      "party": "Republican"
+    },
+    {
+      "id": "S-25",
+      "name": "Donna Campbell",
+      "nameSort": "Donna Campbell",
+      "chamber": "Senate",
+      "district": 25,
+      "photo": "https://senate.texas.gov/members/d25/img/headshot.jpg",
+      "url": "https://senate.texas.gov/member.php?d=25",
+      "party": "Republican"
+    },
+    {
+      "id": "S-26",
+      "name": "José Menéndez",
+      "nameSort": "José Menéndez",
+      "chamber": "Senate",
+      "district": 26,
+      "photo": "https://senate.texas.gov/members/d26/img/headshot.jpg",
+      "url": "https://senate.texas.gov/member.php?d=26",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-27",
+      "name": "Adam Hinojosa",
+      "nameSort": "Adam Hinojosa",
+      "chamber": "Senate",
+      "district": 27,
+      "photo": "https://senate.texas.gov/members/d27/img/Hinojosa_Adam-88-0913D-005-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=27",
+      "party": "Republican"
+    },
+    {
+      "id": "S-28",
+      "name": "Charles Perry",
+      "nameSort": "Charles Perry",
+      "chamber": "Senate",
+      "district": 28,
+      "photo": "https://senate.texas.gov/members/d28/img/Perry-Headshot-2019.jpg",
+      "url": "https://senate.texas.gov/member.php?d=28",
+      "party": "Republican"
+    },
+    {
+      "id": "S-29",
+      "name": "César Blanco",
+      "nameSort": "César Blanco",
+      "chamber": "Senate",
+      "district": 29,
+      "photo": "https://senate.texas.gov/members/d29/img/SCBBio88th-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=29",
+      "party": "Democrat"
+    },
+    {
+      "id": "S-30",
+      "name": "Brent Hagenbuch",
+      "nameSort": "Brent Hagenbuch",
+      "chamber": "Senate",
+      "district": 30,
+      "photo": "https://senate.texas.gov/members/d30/img/Hagenbuch_89-0029-009-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=30",
+      "party": "Republican"
+    },
+    {
+      "id": "S-31",
+      "name": "Kevin Sparks",
+      "nameSort": "Kevin Sparks",
+      "chamber": "Senate",
+      "district": 31,
+      "photo": "https://senate.texas.gov/members/d31/img/Sparks_88-0063D-012-web.jpg",
+      "url": "https://senate.texas.gov/member.php?d=31",
+      "party": "Republican"
+    }
+  ]
+}
