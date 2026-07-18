@@ -8,10 +8,11 @@ Built for people who need this on their phone between meetings—not for power u
 
 1. **See a face** (official headshot, **5:7** frame — House standard 125×175)
 2. **Tap the correct name** from **4** multiple-choice options
-3. Right → XP · wrong → that face returns soon (SM-2)
-4. **Keep going** — drill mode never stops after a short stack; earn XP to **unlock more of the 180-member roster** (Level 1 starts at 30 faces, +20 per level)
+3. **Right → face retired** (won't be re-taught as a prompt; name may still appear as a wrong answer)
+4. **Wrong → stays in the learning pool** until you get it right
+5. Clear a band → next chunk of the 180-member roster unlocks (starts at 30, +20 per band)
 
-Under the hood: continuous flash-card loop + Capitol ranks / XP.
+HUD: `N left · K✓` · rank/XP/streak · leaderboard (tap rank) includes **Reset learned faces**.
 
 ## Why this exists
 

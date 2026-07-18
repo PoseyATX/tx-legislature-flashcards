@@ -421,7 +421,7 @@ export function renderLeaderboard(mount, game = loadGameState()) {
           .join("")}
       </ol>
       <p class="lb-foot">
-        Beat the Governor's Chief of Staff. No pressure.
+        <button type="button" class="lb-reset" id="btn-reset-learning">Reset learned faces</button>
         <a class="kofi-link kofi-inline" href="https://ko-fi.com/poseyatx" target="_blank" rel="noopener noreferrer"
           >☕ buy me a ko-fi</a
         >

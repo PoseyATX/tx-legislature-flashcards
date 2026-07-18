@@ -539,6 +539,17 @@ export function takeNextFromPass(store, members, cursor, now = Date.now()) {
   let index = Number.isFinite(safe.index) ? safe.index : 0;
   let passNumber = Number.isFinite(safe.passNumber) ? safe.passNumber : 0;
 
+  // Drop ids no longer in the active learning set (e.g. just marked known)
+  if (pass.length) {
+    const filtered = [];
+    for (let i = 0; i < pass.length; i += 1) {
+      if (byId.has(pass[i])) filtered.push(pass[i]);
+      else if (i < index) index -= 1; // account for removed prior entries
+    }
+    pass = filtered;
+    if (index < 0) index = 0;
+  }
+
   if (!pass.length || index >= pass.length) {
     pass = buildSessionPass(store, list, passNumber, now);
     index = 0;
@@ -551,7 +562,17 @@ export function takeNextFromPass(store, members, cursor, now = Date.now()) {
     }
   }
 
-  if (!pass.length) {
+  // Skip any stale ids (defensive)
+  while (index < pass.length && !byId.has(pass[index])) index += 1;
+
+  if (index >= pass.length || !pass.length) {
+    // Rebuild once more from current list
+    pass = buildSessionPass(store, list, passNumber + (pass.length ? 1 : 0), now);
+    index = 0;
+    passNumber = pass.length ? passNumber + 1 : passNumber;
+  }
+
+  if (!pass.length || !byId.has(pass[index])) {
     return {
       member: null,
       cursor: { pass: [], index: 0, passNumber },
@@ -569,26 +590,14 @@ export function takeNextFromPass(store, members, cursor, now = Date.now()) {
 }
 
 /**
- * @deprecated Prefer takeNextFromPass. Thin wrapper for older callers.
+ * Clear learning progress (known faces + roster floor). Keeps gamification XP.
  * @param {SrsStore} store
- * @param {{ id: string, chamber: string, district: number, name: string }[]} members
- * @param {string[]} recentIds
- * @param {number} [now]
  */
-export function pickNextMember(store, members, recentIds = [], now = Date.now()) {
-  // Reconstruct a pass that excludes recentIds already shown this pass
-  const seen = new Set(recentIds);
-  const remaining = members.filter((m) => !seen.has(m.id));
-  if (remaining.length) {
-    const pass = buildSessionPass(store, remaining, recentIds.length === 0 ? 0 : 1, now);
-    const id = pass[0];
-    return members.find((m) => m.id === id) || remaining[0];
-  }
-  // Full cycle complete — start a fresh unique pass
-  const pass = buildSessionPass(store, members, 1, now);
-  const last = recentIds[recentIds.length - 1];
-  const ordered = pass[0] === last && pass.length > 1 ? pass.slice(1).concat(pass[0]) : pass;
-  return members.find((m) => m.id === ordered[0]) || members[0] || null;
+export function resetLearningProgress(store) {
+  store.knownIds = [];
+  store.rosterFloor = ROSTER_BASE;
+  store.newIntroducedToday = 0;
+  store.cards = {};
 }
 
 /**
@@ -624,21 +633,6 @@ export function queueStats(store, members, now = Date.now()) {
     mature,
     total: members.length,
     unlocked: members.length,
-  };
-}
-
-/**
- * @deprecated Prefer pickNextMember for live play. Kept for harnesses.
- */
-export function buildQueue(store, members, now = Date.now(), opts = {}) {
-  const excludeId = opts.excludeId || null;
-  const recent = excludeId ? [excludeId] : [];
-  const next = pickNextMember(store, members, recent, now);
-  const stats = queueStats(store, members, now);
-  return {
-    queue: next ? [next.id] : [],
-    practice: false,
-    counts: stats,
   };
 }
 

@@ -14,7 +14,8 @@ import {
   MC_CHOICE_COUNT,
   memberOrder,
   normalizeCard,
-  queueStats,
+  resetLearningProgress,
+  ROSTER_BASE,
   saveStore,
   studyLevelFromXP,
   takeNextFromPass,
@@ -100,10 +101,10 @@ function paintHUD() {
 
 function updateChrome() {
   if (els.left) {
+    const learning = unknownMembers(state.store, state.pool || []);
     const known = knownSet(state.store).size;
-    const unlocked = state.counts?.unlocked ?? state.pool?.length ?? 0;
-    const left = Math.max(0, unlocked - known);
-    // e.g. "12 left · 18 known"
+    // Count remaining *in unlock band*, not global known vs unlock (which went negative)
+    const left = learning.length;
     els.left.textContent =
       state.members?.length > 0 ? `${left} left · ${known}✓` : "—";
   }
@@ -155,7 +156,7 @@ function currentUnlockCount() {
   const game = loadGameState();
   state.studyLevel = studyLevelFromXP(game.xp);
   const fromXp = unlockedRosterSize(state.studyLevel, state.members.length);
-  const floor = Math.max(30, state.store.rosterFloor || 30);
+  const floor = Math.max(ROSTER_BASE, state.store.rosterFloor || ROSTER_BASE);
   return Math.min(state.members.length, Math.max(fromXp, floor));
 }
 
@@ -172,11 +173,10 @@ function learningPool() {
 function refreshStats() {
   ensureCards(state.store, state.members);
   const learning = learningPool();
-  const stats = queueStats(state.store, learning, Date.now());
   const known = knownSet(state.store).size;
   state.counts = {
-    learningDue: stats.learningDue,
-    reviewDue: stats.reviewDue,
+    learningDue: 0,
+    reviewDue: 0,
     newAvailable: learning.length,
     newTotal: learning.length,
     mature: known,
@@ -337,8 +337,12 @@ async function onChoose(memberId) {
   }
 
   if (correct) {
-    // Retire this face as a prompt for the rest of progress (names still OK as foils)
+    // Retire this face as a prompt (names still OK as foils)
     markKnown(state.store, state.current.id);
+    // Drop retired id from the active pass so we never re-deal it
+    if (Array.isArray(state.passCursor.pass)) {
+      state.passCursor.pass = state.passCursor.pass.filter((id) => id !== state.current.id);
+    }
     persist();
     onCorrectAnswer({ host: stack, card: card || stack });
   } else {
@@ -484,9 +488,7 @@ function renderAllKnown() {
   `;
 
   $("btn-keep")?.addEventListener("click", () => nextCard());
-  $("btn-lb-done")?.addEventListener("click", () => {
-    renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
-  });
+  $("btn-lb-done")?.addEventListener("click", () => openLeaderboard());
 
   // If not fully done, auto-expand and continue after a beat
   if (!done) {
@@ -496,10 +498,35 @@ function renderAllKnown() {
   paintHUD();
 }
 
+function openLeaderboard() {
+  renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
+  // Wire reset after paint
+  queueMicrotask(() => {
+    const btn = document.getElementById("btn-reset-learning");
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", () => {
+      if (
+        !confirm(
+          "Reset all learned faces? You'll start the roster over. XP and streaks stay."
+        )
+      ) {
+        return;
+      }
+      resetLearningProgress(state.store);
+      state.passCursor = { pass: [], index: 0, passNumber: 0 };
+      persist();
+      closeLeaderboard();
+      paintHUD();
+      nextCard();
+    });
+  });
+}
+
 function wireChrome() {
   els.leaderboardBtn?.addEventListener("click", (e) => {
     e.preventDefault();
-    renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
+    openLeaderboard();
   });
 
   window.addEventListener("keydown", (e) => {
@@ -517,7 +544,7 @@ function wireChrome() {
     }
     if (e.key === "l" || e.key === "L") {
       e.preventDefault();
-      renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
+      openLeaderboard();
     }
   });
 }
