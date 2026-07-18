@@ -1,14 +1,6 @@
 /**
  * Who's Who — Texas Legislature
- * Dead-simple mobile deck for people who need faces, not settings menus.
- *
- * UX (that's the whole app):
- *   1. See a face
- *   2. Tap card or "Show name" to flip
- *   3. Swipe right / "Know them"  → schedule later (Good)
- *   4. Swipe left  / "Don't know" → see them again soon (Again)
- *
- * SM-2 still runs under the hood. No multiple choice. No typing. No scrolling.
+ * Flip + swipe deck + Capitol gamification (XP, streak, combo, leaderboard).
  */
 
 import {
@@ -22,6 +14,16 @@ import {
   normalizeCard,
   saveStore,
 } from "./srs.js";
+
+import {
+  closeLeaderboard,
+  ensureLeaderboardRoot,
+  loadGameState,
+  onCorrectAnswer,
+  onWrongAnswer,
+  renderHUD,
+  renderLeaderboard,
+} from "./gamification.js";
 
 /** @typedef {{ id: string, name: string, chamber: 'House'|'Senate', district: number, photo: string, url: string, party: string|null }} Member */
 
@@ -59,10 +61,27 @@ const els = {
   dont: $("btn-dont"),
   flip: $("btn-flip"),
   know: $("btn-know"),
+  hudXp: $("hud-xp"),
+  hudStreak: $("hud-streak"),
+  hudCombo: $("hud-combo"),
+  hudRank: $("hud-rank"),
+  leaderboardBtn: $("btn-leaderboard"),
 };
 
 function persist() {
   saveStore(state.store);
+}
+
+function paintHUD() {
+  renderHUD(
+    {
+      xp: els.hudXp,
+      streak: els.hudStreak,
+      combo: els.hudCombo,
+      rank: els.hudRank,
+    },
+    loadGameState()
+  );
 }
 
 function setDockEnabled(on) {
@@ -74,7 +93,7 @@ function setDockEnabled(on) {
 function updateChrome() {
   const due = state.counts.learningDue + state.counts.reviewDue;
   const left = due + state.counts.newAvailable;
-  els.left.textContent = left > 0 ? `${left} left` : "Done";
+  if (els.left) els.left.textContent = left > 0 ? `${left} left` : "Done";
 
   if (els.flip) {
     els.flip.classList.toggle("is-answer", state.flipped);
@@ -87,6 +106,8 @@ function updateChrome() {
       ? "Swipe right if you knew them · left if you didn't"
       : "Tap the card or Show name · then swipe";
   }
+
+  paintHUD();
 }
 
 function chamberLabel(m) {
@@ -171,13 +192,27 @@ function showMember(member, dropIn) {
 /**
  * @param {1|2|3|4} quality
  * @param {'left'|'right'} dir
+ * @param {'correct'|'wrong'} juice
  */
-async function gradeAndAdvance(quality, dir) {
+async function gradeAndAdvance(quality, dir, juice) {
   if (!state.current || !state.currentSrs || state.animating) return;
   state.animating = true;
   setDockEnabled(false);
 
   const stack = $("stack");
+  const card = $("card");
+
+  // Visual dopamine BEFORE fly-away so the player feels it
+  if (juice === "correct") {
+    onCorrectAnswer({ host: stack, card: card || stack });
+  } else {
+    onWrongAnswer({ card: card || stack, button: els.dont });
+  }
+  paintHUD();
+
+  // Let glow/shake/combo land before the card leaves
+  await sleep(juice === "correct" ? 380 : 320);
+
   if (stack) {
     stack.classList.remove("dragging", "show-know", "show-dont");
     stack.style.transform = "";
@@ -194,13 +229,11 @@ async function gradeAndAdvance(quality, dir) {
 }
 
 function knowThem() {
-  // Good = 3 — “I knew that face”
-  gradeAndAdvance(3, "right");
+  gradeAndAdvance(3, "right", "correct");
 }
 
 function dontKnow() {
-  // Again = 1 — bring them back soon
-  gradeAndAdvance(1, "left");
+  gradeAndAdvance(1, "left", "wrong");
 }
 
 function flip() {
@@ -232,7 +265,6 @@ function bindGestures(stack) {
 
 function onDown(e) {
   if (state.animating || e.button === 2) return;
-  // Dock buttons are outside the stack — anything on the card is fair game
   gesture.active = true;
   gesture.moved = false;
   gesture.pointerId = e.pointerId;
@@ -253,12 +285,8 @@ function onMove(e) {
   if (!gesture.active || e.pointerId !== gesture.pointerId) return;
   gesture.dx = e.clientX - gesture.startX;
   gesture.dy = e.clientY - gesture.startY;
-
   if (Math.abs(gesture.dx) > 6 || Math.abs(gesture.dy) > 6) gesture.moved = true;
-
-  // Ignore mostly-vertical (rare; we lock page scroll anyway)
   if (Math.abs(gesture.dy) > Math.abs(gesture.dx) * 1.5) return;
-
   e.preventDefault();
   paintDrag(gesture.dx);
 }
@@ -327,14 +355,12 @@ function endGesture() {
     return;
   }
 
-  // Tap card = flip (no need to hunt for the middle button)
   if (wasTap) {
     stack.style.transform = "";
     flip();
     return;
   }
 
-  // Snap back
   stack.style.transition = "transform 0.2s ease";
   stack.style.transform = "";
   setTimeout(() => {
@@ -352,6 +378,7 @@ function renderCard(dropIn) {
     <div class="stack${dropIn ? " drop-in" : ""}" id="stack">
       <div class="stamp dont" aria-hidden="true">Don't know</div>
       <div class="stamp know" aria-hidden="true">Know them</div>
+      <div class="juice-layer" id="juice-layer" aria-hidden="true"></div>
 
       <div class="scene">
         <div class="card${state.flipped ? " flipped" : ""}" id="card">
@@ -386,6 +413,7 @@ function renderCard(dropIn) {
 
 function renderDone() {
   setDockEnabled(false);
+  const game = loadGameState();
   const upcoming = state.pool
     .map((m) => state.store.cards[m.id])
     .filter((c) => c && c.state !== "new" && c.due > Date.now())
@@ -400,24 +428,33 @@ function renderDone() {
     <div class="empty">
       <div>
         <h2>You're caught up</h2>
+        <p class="empty-rank">${escapeHtml(game.rankTitle || "")} · ${game.xp.toLocaleString()} XP</p>
         <p>${
           nextIn
             ? `Next review in about <strong>${escapeHtml(nextIn)}</strong>.`
             : "No reviews waiting right now."
         }</p>
-        ${
-          nextNew
-            ? `<button type="button" class="dock-btn know" id="btn-more" style="padding:0.85rem 1rem;border-radius:14px">
-                 <span class="dock-label" style="font-size:0.95rem">Study a few more</span>
-               </button>`
-            : ""
-        }
+        <div class="empty-actions">
+          <button type="button" class="dock-btn know empty-btn" id="btn-lb-done">
+            <span class="dock-label">Leaderboard</span>
+          </button>
+          ${
+            nextNew
+              ? `<button type="button" class="dock-btn flip empty-btn" id="btn-more">
+                   <span class="dock-label">Study more</span>
+                 </button>`
+              : ""
+          }
+        </div>
       </div>
     </div>
   `;
 
   $("btn-more")?.addEventListener("click", () => {
     if (nextNew) showMember(nextNew, true);
+  });
+  $("btn-lb-done")?.addEventListener("click", () => {
+    renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
   });
 
   if (els.coach) els.coach.textContent = "Come back later — the hard ones return first.";
@@ -440,8 +477,16 @@ function wireDock() {
     flip();
   });
 
-  // Keyboard for desk users / accessibility
+  els.leaderboardBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
+  });
+
   window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeLeaderboard();
+      return;
+    }
     if (state.animating || !state.current) return;
     if (e.key === " " || e.key === "Enter" || e.key === "f" || e.key === "F") {
       e.preventDefault();
@@ -452,12 +497,17 @@ function wireDock() {
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
       dontKnow();
+    } else if (e.key === "l" || e.key === "L") {
+      e.preventDefault();
+      renderLeaderboard(ensureLeaderboardRoot(), loadGameState());
     }
   });
 }
 
 async function init() {
+  ensureLeaderboardRoot();
   wireDock();
+  paintHUD();
 
   try {
     const res = await fetch("data/members.json", { cache: "no-cache" });
