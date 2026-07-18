@@ -25,13 +25,31 @@ Then open `http://localhost:8080`.
 
 ## Features
 
-- **Photo → Name** — see an official portrait, pick the correct legislator
-- **Name → Photo** — given a name, pick the matching portrait
-- **District → Name** — given chamber + district, identify the member
-- Filter by **House**, **Senate**, or **All**
-- 2 / 4 / 6 multiple-choice difficulty
-- Local score, streak, and best-streak tracking (browser `localStorage`)
-- Keyboard: `1`–`6` choose, `Space` reveal, `N` next card
+### Spaced repetition (Anki / SuperMemo SM-2)
+
+Cards are **not** drawn at random. Each member is a card with SM-2 fields (`ease`, `interval`, `reps`, `due`, learning steps). The study queue is:
+
+1. **Due learning / relearning** (failed cards on short steps: 1m → 10m)
+2. **Due reviews** (most overdue first)
+3. **New cards** in a fixed order (House by district, then Senate), capped at **20 new/day**
+
+After each answer you grade with **Again / Hard / Good / Easy** (interval previews shown). Wrong answers return soon; mastered cards are scheduled days/months out.
+
+Progress is stored in `localStorage` (`tx-leg-flashcards-srs-v2`).
+
+### Mastery-based input (per card)
+
+Input difficulty tracks that card’s SRS maturity:
+
+| Mastery   | When                         | Input                         |
+|-----------|------------------------------|-------------------------------|
+| Learning  | New / learning steps         | Photo → 2-choice (+ district hint) |
+| Young     | Early reviews                | Photo → 4-choice              |
+| Familiar  | Growing interval             | Photo → 6-choice              |
+| Strong    | Interval approaching mature  | Type **last name**            |
+| Mastered  | Interval ≥ 21 days           | Type **full name**            |
+
+Also: chamber filter (All / House / Senate), keyboard grading (`1`–`4` or `A`/`H`/`G`/`E`), `Space` to reveal.
 
 ## Refresh member data
 

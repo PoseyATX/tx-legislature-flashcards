@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Flash cards to learn the faces and names of members of the Texas Legislature (House & Senate)."
+      content="Spaced-repetition flash cards to learn the faces and names of Texas Legislature members."
     />
     <title>Texas Legislature Flash Cards</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%87%BA%F0%9F%87%B8%3C/text%3E%3C/svg%3E" />
@@ -18,30 +18,30 @@
           <span class="brand-flag" aria-hidden="true">★</span>
           <div>
             <h1>Texas Legislature Flash Cards</h1>
-            <p class="tagline">Learn the faces of the 89th Legislature</p>
+            <p class="tagline">SM-2 spaced repetition · 89th Legislature</p>
           </div>
         </div>
         <div class="scoreboard" id="scoreboard" aria-live="polite">
           <div class="stat">
-            <span class="stat-label">Score</span>
-            <span class="stat-value" id="stat-score">0</span>
+            <span class="stat-label">Due</span>
+            <span class="stat-value" id="stat-due">0</span>
           </div>
           <div class="stat">
-            <span class="stat-label">Streak</span>
-            <span class="stat-value" id="stat-streak">0</span>
+            <span class="stat-label">Learning</span>
+            <span class="stat-value" id="stat-learning">0</span>
           </div>
           <div class="stat">
-            <span class="stat-label">Best</span>
-            <span class="stat-value" id="stat-best">0</span>
+            <span class="stat-label">New</span>
+            <span class="stat-value" id="stat-new">0</span>
           </div>
           <div class="stat">
-            <span class="stat-label">Seen</span>
-            <span class="stat-value" id="stat-seen">0</span>
+            <span class="stat-label">Mature</span>
+            <span class="stat-value" id="stat-mature">0</span>
           </div>
         </div>
       </header>
 
-      <section class="controls" aria-label="Game settings">
+      <section class="controls" aria-label="Study settings">
         <div class="control-group">
           <span class="control-label">Chamber</span>
           <div class="segmented" role="group" aria-label="Chamber filter">
@@ -50,21 +50,12 @@
             <button type="button" class="seg" data-chamber="Senate">Senate</button>
           </div>
         </div>
-        <div class="control-group">
-          <span class="control-label">Mode</span>
-          <div class="segmented" role="group" aria-label="Quiz mode">
-            <button type="button" class="seg active" data-mode="photo-to-name">Photo → Name</button>
-            <button type="button" class="seg" data-mode="name-to-photo">Name → Photo</button>
-            <button type="button" class="seg" data-mode="district">District → Name</button>
-          </div>
-        </div>
-        <div class="control-group">
-          <span class="control-label">Choices</span>
-          <div class="segmented" role="group" aria-label="Number of choices">
-            <button type="button" class="seg" data-choices="2">2</button>
-            <button type="button" class="seg active" data-choices="4">4</button>
-            <button type="button" class="seg" data-choices="6">6</button>
-          </div>
+        <div class="control-group control-note">
+          <span class="control-label">Input difficulty</span>
+          <p class="note-text">
+            Adapts per card from mastery: 2-choice → 4 → 6 → type last name → type full name.
+            Scheduling uses Anki-style SM-2 (Again / Hard / Good / Easy).
+          </p>
         </div>
       </section>
 
@@ -83,9 +74,10 @@
         <p class="footer-meta">
           <span id="data-meta"></span>
           ·
-          <button type="button" class="linkish" id="btn-reset">Reset stats</button>
+          <button type="button" class="linkish" id="btn-reset">Reset SRS progress</button>
           ·
-          <kbd>1</kbd>–<kbd>6</kbd> choose · <kbd>N</kbd> next · <kbd>Space</kbd> reveal
+          <kbd>1</kbd>–<kbd>4</kbd> grade · <kbd>Enter</kbd> accept suggested ·
+          <kbd>A</kbd>/<kbd>H</kbd>/<kbd>G</kbd>/<kbd>E</kbd> · <kbd>Space</kbd> reveal
         </p>
       </footer>
     </div>

@@ -1,0 +1,12 @@
+{
+  "name": "tx-legislature-flashcards",
+  "version": "1.1.0",
+  "private": true,
+  "description": "SM-2 spaced-repetition flash cards for Texas Legislature members",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "scrape": "python3 scripts/scrape_members.py",
+    "test:srs": "node scripts/test-srs.mjs"
+  }
+}

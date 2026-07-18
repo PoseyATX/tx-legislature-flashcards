@@ -550,3 +550,191 @@ kbd {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   color: #d7e4f5;
 }
+
+.control-note {
+  flex: 1 1 16rem;
+  min-width: min(100%, 16rem);
+}
+
+.note-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  max-width: 36rem;
+  line-height: 1.4;
+}
+
+.prompt-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.srs-line {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem !important;
+  opacity: 0.85;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.type-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: stretch;
+}
+
+.type-input {
+  flex: 1 1 12rem;
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font: inherit;
+  font-size: 1.05rem;
+}
+
+.type-input:focus {
+  outline: 2px solid rgba(142, 197, 255, 0.55);
+  outline-offset: 1px;
+  border-color: rgba(142, 197, 255, 0.45);
+}
+
+.type-input:disabled {
+  opacity: 0.7;
+}
+
+.grade-panel {
+  border-top: 1px solid var(--border);
+  padding-top: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.grade-hint {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.grade-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (max-width: 560px) {
+  .grade-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.grade-btn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 0.7rem 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  align-items: center;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;
+}
+
+.grade-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.grade-btn.suggested {
+  box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.55);
+}
+
+.grade-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.grade-interval {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.grade-again {
+  border-color: rgba(214, 69, 69, 0.45);
+}
+.grade-again:hover {
+  background: var(--danger-soft);
+}
+
+.grade-hard {
+  border-color: rgba(201, 162, 39, 0.4);
+}
+.grade-hard:hover {
+  background: var(--gold-soft);
+}
+
+.grade-good {
+  border-color: rgba(47, 158, 107, 0.45);
+}
+.grade-good:hover {
+  background: var(--success-soft);
+}
+
+.grade-easy {
+  border-color: rgba(100, 160, 255, 0.45);
+}
+.grade-easy:hover {
+  background: rgba(100, 160, 255, 0.12);
+}
+
+.caught-up {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.caught-up h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.caught-up > p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  max-width: 40rem;
+}
+
+.caught-up-stats {
+  margin: 0 0 1.25rem;
+  padding-left: 1.2rem;
+  color: var(--text);
+}
+
+.caught-up-stats li {
+  margin: 0.35rem 0;
+}
+
+.caught-up-note {
+  margin: 1.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  max-width: 40rem;
+}
