@@ -11,8 +11,8 @@ import {
   markIntroduced,
   markKnown,
   maybeExpandRoster,
+  buildUnlockOrder,
   MC_CHOICE_COUNT,
-  memberOrder,
   normalizeCard,
   resetLearningProgress,
   ROSTER_BASE,
@@ -41,11 +41,12 @@ const FLY_MS = 280;
 const AFTER_ANSWER_MS = 720;
 
 const state = {
+  /** Full roster in interleaved House/Senate unlock order */
   members: /** @type {Member[]} */ ([]),
-  /** Unlocked subset for the current study level */
+  /** Unlocked subset (prefix of members) */
   pool: /** @type {Member[]} */ ([]),
   store: loadStore(),
-  /** Round-robin cursor: one unique pass through the unlocked roster at a time. */
+  /** Round-robin cursor over unlearned faces only */
   passCursor: {
     pass: /** @type {string[]} */ ([]),
     index: 0,
@@ -100,15 +101,11 @@ function paintHUD() {
 }
 
 function updateChrome() {
+  // Progress pill stays quiet — no “known/retired/learning” jargon for players
   if (els.left) {
-    const learning = unknownMembers(state.store, state.pool || []);
-    const known = knownSet(state.store).size;
-    // Count remaining *in unlock band*, not global known vs unlock (which went negative)
-    const left = learning.length;
-    els.left.textContent =
-      state.members?.length > 0 ? `${left} left · ${known}✓` : "—";
+    els.left.textContent = "";
+    els.left.hidden = true;
   }
-
   paintHUD();
 }
 
@@ -206,11 +203,7 @@ function nextCard() {
     );
     persist();
     if (!expanded) break;
-    showLevelUp(
-      Math.max(1, Math.ceil((newFloor - 30) / 20) + 1),
-      newFloor
-    );
-    // Reset pass so new faces deal in order
+    // Silent expand — no “level unlocked” chrome for players
     state.passCursor = { pass: [], index: 0, passNumber: 0 };
     learning = learningPool();
   }
@@ -319,12 +312,11 @@ async function onChoose(memberId) {
     else if (id === memberId && !correct) btn.classList.add("wrong");
   });
 
+  // Quiet feedback: just the name + district — no scoring jargon
   const fb = $("answer-feedback");
   if (fb) {
     fb.className = `answer-feedback ${correct ? "ok" : "bad"}`;
-    fb.textContent = correct
-      ? `✓ ${chamberLabel(state.current)} ${state.current.name}`
-      : `✗ ${chamberLabel(state.current)} ${state.current.name}`;
+    fb.textContent = `${chamberLabel(state.current)} ${state.current.name}`;
   }
 
   const reveal = $("photo-reveal");
@@ -337,9 +329,7 @@ async function onChoose(memberId) {
   }
 
   if (correct) {
-    // Retire this face as a prompt (names still OK as foils)
     markKnown(state.store, state.current.id);
-    // Drop retired id from the active pass so we never re-deal it
     if (Array.isArray(state.passCursor.pass)) {
       state.passCursor.pass = state.passCursor.pass.filter((id) => id !== state.current.id);
     }
@@ -355,18 +345,6 @@ async function onChoose(memberId) {
   await sleep(AFTER_ANSWER_MS);
   const quality = /** @type {1|2|3|4} */ (correct ? 3 : 1);
   await advanceAfterGrade(quality, correct ? "right" : "left");
-}
-
-function showLevelUp(level, unlocked) {
-  const host = $("stack") || els.stage;
-  if (!host) return;
-  const el = document.createElement("div");
-  el.className = "level-toast";
-  el.textContent = `LEVEL ${level} · ${unlocked} faces unlocked`;
-  host.appendChild(el);
-  void el.offsetWidth;
-  el.classList.add("is-on");
-  setTimeout(() => el.remove(), 1400);
 }
 
 function sleep(ms) {
@@ -407,11 +385,6 @@ function renderCard(dropIn) {
   els.stage.innerHTML = `
     <div class="stack${dropIn ? " drop-in" : ""}" id="stack">
       <article class="card card-quiz" id="card">
-        <header class="card-head">
-          <span class="badge">${unknownMembers(state.store, state.pool).length} to learn · ${knownSet(state.store).size} known</span>
-          <span class="badge badge-muted">4 choices · correct = retired</span>
-        </header>
-
         <div class="portrait-block">
           <div class="portrait-frame" style="aspect-ratio: ${PHOTO_RATIO}">
             <img
@@ -451,26 +424,18 @@ function renderAllKnown() {
   const total = state.members.length;
   const done = known >= total;
 
+  // Still expanding → don't show a meta “band clear” screen; just continue
+  if (!done) {
+    setTimeout(() => nextCard(), 400);
+    return;
+  }
+
   els.stage.innerHTML = `
     <div class="empty">
       <div>
-        <h2>${done ? "Roster clear" : "Band clear"}</h2>
-        <p class="empty-rank">${escapeHtml(game.rankTitle || "")} · ${game.xp.toLocaleString()} XP</p>
-        <p>
-          ${
-            done
-              ? `You've correctly ID'd all <strong>${total}</strong> members. Names can still show as wrong answers if you reset.`
-              : `You've locked in this unlock band (<strong>${known}</strong> known). Opening more faces…`
-          }
-        </p>
+        <h2>That's everyone</h2>
+        <p class="empty-rank">${escapeHtml(game.rankTitle || "")}</p>
         <div class="empty-actions">
-          ${
-            !done
-              ? `<button type="button" class="dock-btn know empty-btn" id="btn-keep">
-                   <span class="dock-label">Continue</span>
-                 </button>`
-              : ""
-          }
           <button type="button" class="dock-btn flip empty-btn" id="btn-lb-done">
             <span class="dock-label">Leaderboard</span>
           </button>
@@ -487,14 +452,7 @@ function renderAllKnown() {
     </div>
   `;
 
-  $("btn-keep")?.addEventListener("click", () => nextCard());
   $("btn-lb-done")?.addEventListener("click", () => openLeaderboard());
-
-  // If not fully done, auto-expand and continue after a beat
-  if (!done) {
-    setTimeout(() => nextCard(), 900);
-  }
-
   paintHUD();
 }
 
@@ -506,11 +464,7 @@ function openLeaderboard() {
     if (!btn || btn.dataset.bound) return;
     btn.dataset.bound = "1";
     btn.addEventListener("click", () => {
-      if (
-        !confirm(
-          "Reset all learned faces? You'll start the roster over. XP and streaks stay."
-        )
-      ) {
+      if (!confirm("Start over?")) {
         return;
       }
       resetLearningProgress(state.store);
@@ -562,9 +516,9 @@ async function init() {
     const raw = Array.isArray(data) ? data : data?.members;
     if (!Array.isArray(raw)) throw new Error("members.json missing members array");
 
-    state.members = raw
-      .filter((m) => m && m.name && m.photo)
-      .sort(memberOrder);
+    state.members = buildUnlockOrder(
+      raw.filter((m) => m && m.name && m.photo)
+    );
 
     if (state.members.length < 4) {
       throw new Error(`Need at least 4 members (got ${state.members.length})`);
@@ -572,7 +526,7 @@ async function init() {
 
     ensureCards(state.store, state.members);
     if (!Array.isArray(state.store.knownIds)) state.store.knownIds = [];
-    if (!state.store.rosterFloor) state.store.rosterFloor = 30;
+    if (!state.store.rosterFloor) state.store.rosterFloor = ROSTER_BASE;
     persist();
     learningPool();
     paintHUD();

@@ -344,16 +344,52 @@ export function dayKey(ts = Date.now()) {
 }
 
 /**
- * Stable introduction order: House by district, then Senate by district, then name.
+ * Sort within a chamber by district, then name.
  * @param {{ id: string, chamber: string, district: number, name: string }} a
  * @param {{ id: string, chamber: string, district: number, name: string }} b
  */
 export function memberOrder(a, b) {
-  const ca = a.chamber === "House" ? 0 : 1;
-  const cb = b.chamber === "House" ? 0 : 1;
-  if (ca !== cb) return ca - cb;
   if (a.district !== b.district) return a.district - b.district;
   return a.name.localeCompare(b.name);
+}
+
+/**
+ * Unlock / deal order: interleave House and Senate so the early roster
+ * is not 30 House members before any Senator appears.
+ * Pattern: H1, S1, H2, S2, … then remaining House after S31.
+ *
+ * @param {{ id: string, chamber: string, district: number, name: string }[]} members
+ */
+export function buildUnlockOrder(members) {
+  const house = members
+    .filter((m) => m.chamber === "House")
+    .sort(memberOrder);
+  const senate = members
+    .filter((m) => m.chamber === "Senate")
+    .sort(memberOrder);
+  const out = [];
+  let hi = 0;
+  let si = 0;
+  while (hi < house.length || si < senate.length) {
+    if (hi < house.length) out.push(house[hi++]);
+    if (si < senate.length) out.push(senate[si++]);
+  }
+  // Anyone with unexpected chamber tags
+  const seen = new Set(out.map((m) => m.id));
+  for (const m of members) {
+    if (!seen.has(m.id)) out.push(m);
+  }
+  return out;
+}
+
+/** Fisher–Yates shuffle (copy). */
+export function shuffleCopy(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 /**
@@ -497,27 +533,9 @@ export function minSessionSpacing(poolSize) {
 export function buildSessionPass(store, members, passIndex = 0, now = Date.now()) {
   if (!members.length) return [];
 
-  if (passIndex === 0) {
-    // Stable introduction order — no randomness, no duplicates
-    return [...members].sort(memberOrder).map((m) => m.id);
-  }
-
-  // Later passes: unique set ordered by need (weak / due / stale)
-  return [...members]
-    .map((m) => {
-      const c = store.cards[m.id] || createNewCard(m.id, now);
-      return { m, c };
-    })
-    .sort((a, b) => {
-      const aDue = a.c.due <= now ? 0 : 1;
-      const bDue = b.c.due <= now ? 0 : 1;
-      if (aDue !== bDue) return aDue - bDue;
-      if (a.c.lapses !== b.c.lapses) return b.c.lapses - a.c.lapses;
-      if (a.c.last !== b.c.last) return a.c.last - b.c.last;
-      if (a.c.ease !== b.c.ease) return a.c.ease - b.c.ease;
-      return memberOrder(a.m, b.m);
-    })
-    .map(({ m }) => m.id);
+  // Always shuffle the active learning set so play is not district-order.
+  // Uniqueness is preserved (one of each id per pass).
+  return shuffleCopy(members).map((m) => m.id);
 }
 
 /**

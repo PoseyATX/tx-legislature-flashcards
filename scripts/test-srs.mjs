@@ -11,6 +11,7 @@ import {
   unknownMembers,
   maybeExpandRoster,
   resetLearningProgress,
+  buildUnlockOrder,
   MC_CHOICE_COUNT,
   ROSTER_BASE,
   applyGrade,
@@ -119,6 +120,26 @@ for (let t = 0; t < 20; t += 1) {
   cursor = next;
 }
 assert(new Set(ids).size === 20, "20 unique first pass");
+
+// Unlock order interleaves chambers (not all House before any Senate)
+const mixed = Array.from({ length: 10 }, (_, i) => ({
+  id: `H-${i}`,
+  chamber: "House",
+  district: i + 1,
+  name: `H${i}`,
+})).concat(
+  Array.from({ length: 5 }, (_, i) => ({
+    id: `S-${i + 1}`,
+    chamber: "Senate",
+    district: i + 1,
+    name: `S${i + 1}`,
+  }))
+);
+const order = buildUnlockOrder(mixed);
+const first30 = order.slice(0, 10);
+const hasSenate = first30.some((m) => m.chamber === "Senate");
+const hasHouse = first30.some((m) => m.chamber === "House");
+assert(hasSenate && hasHouse, "early unlock includes both chambers");
 
 if (failed) {
   console.error(`${failed} assertion(s) failed`);

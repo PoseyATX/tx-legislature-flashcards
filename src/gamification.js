@@ -421,7 +421,7 @@ export function renderLeaderboard(mount, game = loadGameState()) {
           .join("")}
       </ol>
       <p class="lb-foot">
-        <button type="button" class="lb-reset" id="btn-reset-learning">Reset learned faces</button>
+        <button type="button" class="lb-reset" id="btn-reset-learning">Start over</button>
         <a class="kofi-link kofi-inline" href="https://ko-fi.com/poseyatx" target="_blank" rel="noopener noreferrer"
           >☕ buy me a ko-fi</a
         >
